@@ -32,3 +32,6 @@ def course_add(request):
     return render(request, 'courses/course_form.html', {
         'form': form,
     })
+
+def add_module(request):
+    if 
