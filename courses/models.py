@@ -31,6 +31,7 @@ class Component(models.Component):
     index = models.IndexField()
 
     class Meta:
+        astract = True
         ordering = ['index']
 
     def __str__(self):
@@ -41,3 +42,8 @@ class Component(models.Component):
             self.index = self.module.components.count() - 1
         super(Component, self).save(*args, **kwargs)
 
+class TextComponent(Component):
+    text_passage = models.CharField(max_length=200)
+
+class ImageComponent(Component):
+    image_details = models.CharField(max_length=200)
