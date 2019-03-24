@@ -23,7 +23,7 @@ class Instructor(models.Model):
 
 # Component Model
 class Component(models.Component):
-    module = models.ForeignKey(Module, on_delete=models.CASCADE)
+    course = models.ForeignKey(Course, on_delete=models.CASCADE)
 
     title = models.CharField(max_length=200)
     date_of_creation = models.DateField()
@@ -31,7 +31,7 @@ class Component(models.Component):
     index = models.IndexField()
 
     class Meta:
-        astract = True
+        abstract = True
         ordering = ['index']
 
     def __str__(self):
@@ -39,7 +39,7 @@ class Component(models.Component):
 
     def save(self, *args, **kwargs):
         if not self.index:
-            self.index = self.module.components.count() - 1
+            self.index = self.course.components.count() - 1
         super(Component, self).save(*args, **kwargs)
 
 class TextComponent(Component):
