@@ -22,13 +22,13 @@ class Instructor(models.Model):
     )
 
 # Component Model
-class Component(models.Component):
+class Component(models.Model):
     course = models.ForeignKey(Course, on_delete=models.CASCADE)
 
     title = models.CharField(max_length=200)
     date_of_creation = models.DateField()
     date_of_last_update = models.DateField()
-    index = models.IndexField()
+    index = models.IntegerField()
 
     class Meta:
         abstract = True
