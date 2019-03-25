@@ -1,5 +1,6 @@
 from django.shortcuts import render
 from django.http import HttpRequest, HttpResponseRedirect
+from django.template import loader
 
 from courses.forms import CourseForm
 from courses.models import Course
@@ -31,4 +32,10 @@ def course_add(request):
         form = CourseForm()
     return render(request, 'courses/course_form.html', {
         'form': form,
+    })
+
+def home(request):
+    courses = Course.objects.all()
+    return render(request, 'home.html', {
+        'courses': courses,
     })
