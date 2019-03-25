@@ -2,8 +2,10 @@ from django.shortcuts import render
 from django.http import HttpRequest, HttpResponseRedirect
 from django.template import loader
 
-from courses.forms import CourseForm
-from courses.models import Course
+from django.contrib.auth.models import User
+
+from courses.forms import CourseForm, QuizForm
+from courses.models import *
 
 def course_detail(request, course_id):
     course = Course.objects.get(id=course_id)
@@ -38,4 +40,16 @@ def home(request):
     courses = Course.objects.all()
     return render(request, 'home.html', {
         'courses': courses,
+    })
+
+def take_quiz(request, quiz_id):
+    quiz = Quiz.objects.get(id=quiz_id)
+    form = QuizForm(questions=quiz.question_set.all())
+    if request.method == "POST":
+        form = QuizForm(request.POST, questions=quiz.question_set.all())
+        if form.is_valid(): ## Will only ensure the option exists, not correctness.
+            attempt = form.save()
+            return redirect(attempt)
+    return render(request, 'quiz/take_quiz.html', {
+        "form": form
     })
