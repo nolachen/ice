@@ -43,7 +43,7 @@ class Component(models.Component):
         super(Component, self).save(*args, **kwargs)
 
 class TextComponent(Component):
-    text_passage = models.CharField(max_length=200)
+    text_passage = models.TextField()
 
 class ImageComponent(Component):
     image_details = models.CharField(max_length=200)
