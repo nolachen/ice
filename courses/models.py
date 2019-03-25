@@ -20,3 +20,30 @@ class Instructor(models.Model):
         primary_key=True,
         on_delete=models.PROTECT
     )
+
+# Component Model
+class Component(models.Component):
+    course = models.ForeignKey(Course, on_delete=models.CASCADE)
+
+    title = models.CharField(max_length=200)
+    date_of_creation = models.DateField()
+    date_of_last_update = models.DateField()
+    index = models.IndexField()
+
+    class Meta:
+        abstract = True
+        ordering = ['index']
+
+    def __str__(self):
+        return self.title
+
+    def save(self, *args, **kwargs):
+        if not self.index:
+            self.index = self.course.components.count() - 1
+        super(Component, self).save(*args, **kwargs)
+
+class TextComponent(Component):
+    text_passage = models.CharField(max_length=200)
+
+class ImageComponent(Component):
+    image_details = models.CharField(max_length=200)
