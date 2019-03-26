@@ -38,24 +38,15 @@ class Module(models.Model):
 	def getComponents(self):
 		return Component.objects.filter(module=self)
 
-<<<<<<< HEAD
-class Module(models.Model):
-    course = models.ForeignKey(Course, related_name='modules', on_delete=models.CASCADE)
-    title = models.CharField(max_length=200)
-    # index of ordering within the course
-    index = models.IntegerField()
-
-    class Meta:
-        ordering = ['index']
+class Component(models.Model):
+    module = models.ForeignKey(Module, on_delete=models.CASCADE)
+    title = models.CharField(max_length=200, default='')
+    date_of_creation = models.DateField()
+    date_of_last_update = models.DateField()
+    position = models.IntegerField(default=0)
 
     def __str__(self):
         return self.title
-    
-    def save(self, *args, **kwargs):
-        if not self.index:
-            # Default the index to the last one in the sequence
-            self.index = self.course.modules.count() - 1
-        super(Module, self).save(*args, **kwargs)
 
 class Quiz(models.Model):
     course = models.ForeignKey(Course, on_delete=models.CASCADE)
@@ -83,15 +74,3 @@ class Answer(models.Model):
 
     def __str__(self):
         return self.answer_text
-=======
-# Component Model
-class Component(models.Model):
-    module = models.ForeignKey(Module, on_delete=models.CASCADE)
-    title = models.CharField(max_length=200, default='')
-    date_of_creation = models.DateField()
-    date_of_last_update = models.DateField()
-    position = models.IntegerField(default=0)
-
-    def __str__(self):
-        return self.title
->>>>>>> sara-dev
