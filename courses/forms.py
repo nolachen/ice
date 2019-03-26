@@ -25,8 +25,8 @@ class QuizForm(forms.Form):
                 ('B', 'choice 2'),
                 ('C', 'choice 3'),
                 ('D', 'choice 4'),
-
             )
+            
             """
             for answer in Answer.objects.filter(question_id=question.question_id):
                 choices.append(answer.answer_text)
