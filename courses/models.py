@@ -13,6 +13,9 @@ class Course(models.Model):
     description = models.TextField(default='')
     deployed = models.BooleanField(default=False)
 
+    def __str__(self):
+        return self.name
+
     def get_absolute_url(self):
         return reverse('course_detail', args=(self.id, ))
 
@@ -42,12 +45,17 @@ class Module(models.Model):
         super(Module, self).save(*args, **kwargs)
 
 class Quiz(models.Model):
-    course = models.ForeignKey(Course, on_delete=models.CASCADE)
+    title = models.CharField(max_length=200)
+    course = models.ForeignKey(Course, related_name="quizzes", on_delete=models.CASCADE)
     # Optional; If a module is deleted, just set the module for this quiz to null
     module = models.OneToOneField(Module, on_delete=models.SET_NULL, null=True, blank=True)
 
     num_questions = models.IntegerField()
     passing_score = models.FloatField(validators=[MaxValueValidator(100), MinValueValidator(0)])
+
+    def __str__(self):
+        return self.title
+
 
 class Question(models.Model):
     quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE)
@@ -64,11 +72,14 @@ class Answer(models.Model):
 
 # Component Model
 class Component(models.Model):
-    course = models.ForeignKey(Course, related_name="components", on_delete=models.CASCADE)
+    course = models.ForeignKey(Course, related_name="%(class)ss", on_delete=models.CASCADE)
+    module = models.ForeignKey(Module, on_delete=models.SET_NULL, null=True, blank=True)
 
     title = models.CharField(max_length=200)
-    date_of_creation = models.DateField()
-    date_of_last_update = models.DateField()
+    date_of_creation = models.DateField(auto_now_add=True)
+    date_of_last_update = models.DateField(auto_now=True)
+
+    # Order within the module
     index = models.IntegerField()
 
     class Meta:
@@ -77,11 +88,6 @@ class Component(models.Model):
 
     def __str__(self):
         return self.title
-
-    def save(self, *args, **kwargs):
-        if not self.index:
-            self.index = self.course.components.count() - 1
-        super(Component, self).save(*args, **kwargs)
 
 class TextComponent(Component):
     text_passage = models.TextField()

@@ -1,4 +1,4 @@
-<h1>{{ course.title }} > All Modules</h1>
+<h1>{{ course.name }} > All Modules</h1>
 
 <div>
     <ol>
@@ -6,5 +6,5 @@
         <li> {{ module.title }}</li>
         {% endfor %}
     </ol>     
-    <a href="{% url 'create_module' %}">New module</a>    
+    <a href="{% url 'new_module' course_id=course.id %}">New module</a>    
 </div>

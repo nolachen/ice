@@ -1,7 +1,9 @@
-<h1>{{ course.title }} > {{ action_word }} Module</h1>
+<h1>{{ course.name }} > {{ action_word }} Module</h1>
 
-<form action="{% url 'module' %}" method="post">
+<form action="{% url 'new_module' course_id=course.id %}" method="post">
     {% csrf_token %}
+    {{ form.as_p }}
+    <input type="submit" value="Submit">
     <!-- <div>
         <label for="module_title">Title: </label>
         <input id="module_title" type="text" name="module_title" />
