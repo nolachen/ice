@@ -27,7 +27,6 @@ urlpatterns = [
     path('accounts/signup/', signup, name='signup'),
     path('course_list/', course_list),
     path('admin/', admin.site.urls),
-    #path('course_detail/<int:course_id>/', course_detail, name='course_detail'),
     path('course_add/', course_add),
     path('take_quiz/<int:quiz_id>/', take_quiz),
     path('course_detail/<int:course_id>/', view_course, name='view_course'),

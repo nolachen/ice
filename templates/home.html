@@ -9,7 +9,7 @@
   <p>Available Courses</p>
     <ol>
     {% for course in courses %}
-    <li><a href="{% url 'course_detail' course.id %}">{{ course.name }}</a></li>
+    <li><a href="{% url 'view_course' course.id %}">{{ course.name }}</a></li>
     <p> {{ course.description }} <p>
     {% endfor %}
     </ol>

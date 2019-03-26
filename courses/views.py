@@ -20,7 +20,7 @@ def view_course(request,course_id):
 	x = 3
 	modules = Module.objects.filter(course=courseObj).order_by("position")
 
-	template=loader.get_template('courseInfo.html')
+	template=loader.get_template('courses/course_info.html')
 	context={'course': courseObj, 'modules': modules, 'enrollStatus': x, 'participant_id': request.user.id }
 	return HttpResponse(template.render(context,request))
 
@@ -42,7 +42,7 @@ def loadComponents(request, course_id, module_id):
     component_list = moduleObj.getComponents().order_by("position")
     context = {'components': component_list}
     print (context)
-    template = loader.get_template('componentList.html')
+    template = loader.get_template('courses/component_list.html')
     return HttpResponse(template.render(context,request))
 
 """

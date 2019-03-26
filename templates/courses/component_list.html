@@ -13,9 +13,9 @@
 {% for component in components %}
 	<li role="presentation" id="{{ component.id }}"><a data-toggle="tab"  class="componentLoad" id="{{ component.id }}">{{ component.title }}</a></li>
 {% endfor %}
+
 </ul>
 {% if canAdd != 1 %}
-
 <div id="componentBody"></div>
 {% endif %}
 
@@ -33,7 +33,6 @@
             <option value="video">Video</option>
         </select>    
     </div>
-	
 </form>	
 {% else %}
 	<p id="lastModule" hidden>{{lastModule}}</p>
