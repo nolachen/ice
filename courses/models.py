@@ -11,7 +11,7 @@ class Instructor(models.Model):
     )
     name = models.CharField(default='', max_length=200)
 class Course(models.Model):
-     name = models.CharField(max_length=200)
+    name = models.CharField(max_length=200)
     #instructor = models.ForeignKey(Instructor, on_delete=models.CASCADE)
     instructor_name = models.TextField(default='')
     category = models.TextField(default='')
@@ -25,7 +25,7 @@ class Course(models.Model):
 	    return Module.objects.filter(course = self)
 
     def addModule(self, moduleName, modulePosition):
-        new_module = Module(name = moduleName, position = modulePosition, course = self)
+        new_module = Module(name = moduleName, index = modulePosition, course = self)
         new_module.save()
 
     def get_absolute_url(self):
@@ -50,7 +50,7 @@ class Module(models.Model):
         super(Module, self).save(*args, **kwargs)
     
     def getComponents(self):
-		return Component.objects.filter(module=self)
+        return Component.objects.filter(module=self)
 
 class Quiz(models.Model):
     title = models.CharField(max_length=200)

@@ -5,7 +5,7 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 from django.urls import reverse
 
 from courses.forms import CourseForm, ModuleForm, QuizForm
-from courses.models import *
+from courses.models import Instructor, Course, Module, Quiz
 
 import logging
 logger = logging.getLogger(__name__)
@@ -27,7 +27,7 @@ def is_instructor(user):
 def view_course(request,course_id):
 	courseObj = Course.objects.get(id=course_id)
 	x = 3
-	modules = Module.objects.filter(course=courseObj).order_by("position")
+	modules = Module.objects.filter(course=courseObj).order_by("index")
 
 	template=loader.get_template('courses/course_info.html')
 	context={'course': courseObj, 'modules': modules, 'enrollStatus': x, 'participant_id': request.user.id }
@@ -48,7 +48,7 @@ def course_list(request):
 def loadComponents(request, course_id, module_id):
     courseObj = Course.objects.get(id=course_id)    
     moduleObj = Module.objects.get(id=module_id)
-    component_list = moduleObj.getComponents().order_by("position")
+    component_list = moduleObj.getComponents().order_by("index")
     context = {'components': component_list}
     print (context)
     template = loader.get_template('courses/component_list.html')
