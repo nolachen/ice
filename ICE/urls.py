@@ -18,13 +18,16 @@ from django.urls import path, include
 from django.views.generic.base import TemplateView
 
 from courses.views import *
+from accounts.views import *
 
 urlpatterns = [
     path('', home),
     path('accounts/', include('accounts.urls')),
     path('accounts/', include('django.contrib.auth.urls')),
+    path('accounts/signup/', signup, name='signup'),
     path('course_list/', course_list),
     path('admin/', admin.site.urls),
     path('course_detail/<int:course_id>/', course_detail, name='course_detail'),
     path('course_add/', course_add),
+    path('take_quiz/<int:quiz_id>/', take_quiz),
 ]
