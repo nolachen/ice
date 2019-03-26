@@ -1,0 +1,92 @@
+{% load staticfiles %}
+<script  src="{% static 'jquery-3.3.1.min.js' %}"></script>
+<head>
+  <title>Course Information</title>
+</head>
+
+<script>
+		function getCookie(name) {
+			var cookieValue = null;
+			if (document.cookie && document.cookie !== '') {
+				var cookies = document.cookie.split(';');
+				for (var i = 0; i < cookies.length; i++) {
+					var cookie = jQuery.trim(cookies[i]);
+					// Does this cookie string begin with the name we want?
+					if (cookie.substring(0, name.length + 1) === (name + '=')) {
+						cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+						break;
+					}
+				}
+			}
+			return cookieValue;
+		}
+
+  $(document).ready(function() {
+      var modSelected = 0;
+      var compSelected = 0;
+			$("#moduleContainer").on("click", ".moduleLoad", function(event){
+				if(modSelected==this.id)
+					return;
+        modSelected = this.id;
+
+        $("#compContainer").html("Loading Components...");
+
+        $.ajax({
+          url: modSelected+'/loadComponents',
+          type: 'GET',
+          success: function(data){
+              $('#compContainer').html(data);
+          }
+        });
+
+      });
+});
+
+</script>
+<div class="container-fluid" id="ticker" style="padding-top: 60px;"></div>
+<div class="container" style="padding-top:10px">
+  <h4>Course Detail</h4>
+  <div class="row well">
+    <div class="col-md-12">
+      {% if course %}
+      <p> Name: {{ course.name }}</p>
+      <p> Category: {{ course.category }}</p>
+      <p> Insructor: {{ course.instructor_name }}</p>
+      <p> Description: {{ course.description }}</p>
+      </br>
+      
+      <h4> Modules </h4>
+      <div id="moduleContainer">
+        {% include "module.html" %}
+        <!--<li> {{module.title}} </li>-->
+      </div>
+
+      <div id="compContainer"></div>
+
+      </br>
+      {% if enrollStatus == 1 %}
+      <form name="form" action="{% url 'addDrop' %}" method="POST">
+        {% csrf_token %}
+        <div>
+          <input type="hidden" value={{course.id}} name="course_id" />
+          <input type="hidden" value=1 name="drop" />
+          <input class="del" type="submit" value="Drop" />
+        </div>
+      </form>
+      <input type="submit" class="addi" value="Mark course as completed" id="completeCourse" hidden/>
+      {% endif %} {% if enrollStatus == 2 %}
+      <form name="form" action="{% url 'addDrop' %}" method="POST">
+        {% csrf_token %}
+        <div>
+          <input type="hidden" value={{course.id}} name="course_id" />
+          <input type="hidden" value=0 name="drop" />
+          <input type="submit" class="rnm" value="Drop Current & Enroll" />
+        </div>
+      </form>
+      {% endif %} {% else %}
+      <p>No course details available for this course</p>
+      {% endif %} {% if enrollStatus == 3 %}
+      {% endif %}
+    </div>
+  </div>
+</div>

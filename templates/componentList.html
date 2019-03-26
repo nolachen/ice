@@ -1,0 +1,49 @@
+
+{% if canAdd == 1 %}
+
+	<div class="container">
+		<div class="col-md-12">
+			<div class="row well">
+
+{% endif%}
+
+<h4>Components</h4>
+
+<ul class="nav nav-tabs" id="components">
+{% for component in components %}
+	<li role="presentation" id="{{ component.id }}"><a data-toggle="tab"  class="componentLoad" id="{{ component.id }}">{{ component.title }}</a></li>
+{% endfor %}
+</ul>
+{% if canAdd != 1 %}
+
+<div id="componentBody"></div>
+{% endif %}
+
+
+{% if canAdd == 1 %}
+<div class="col-md-6" style="padding-left:0px" >
+	<input type="text" placeholder="Enter the component" name ="component_name" id="component_name" />
+	<button type="button" class="addi"  value="Add Component" id="addCom">Add Component</button>
+
+	</div>
+
+	<div id="compTypeDiv" class="col-md-6">
+        <select id="compType" class="soflow" name="compType">
+            <option value="file">File</option>
+            <option value="video">Video</option>
+        </select>    
+    </div>
+	
+</form>	
+{% else %}
+	<p id="lastModule" hidden>{{lastModule}}</p>
+{% endif %}
+
+</div>
+</div>
+</div>
+{% if canAdd == 1 %}
+
+<div id="componentBody"></div>
+
+{% endif %}
