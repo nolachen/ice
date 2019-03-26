@@ -16,7 +16,7 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from django.views.generic.base import TemplateView
-
+from django.conf import settings
 from courses.views import *
 from accounts.views import *
 
@@ -27,7 +27,16 @@ urlpatterns = [
     path('accounts/signup/', signup, name='signup'),
     path('course_list/', course_list),
     path('admin/', admin.site.urls),
-    path('course_detail/<int:course_id>/', course_detail, name='course_detail'),
+    #path('course_detail/<int:course_id>/', course_detail, name='course_detail'),
     path('course_add/', course_add),
+<<<<<<< HEAD
     path('take_quiz/<int:quiz_id>/', take_quiz),
+=======
+    path('course_detail/<int:course_id>/', view_course, name='view_course'),
+    path('course_detail/<int:course_id>/<int:module_id>/loadComponents/', loadComponents, name='loadComponents'),
+>>>>>>> sara-dev
 ]
+
+if settings.DEBUG:
+    from django.contrib.staticfiles.urls import staticfiles_urlpatterns
+    urlpatterns += staticfiles_urlpatterns()

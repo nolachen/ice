@@ -1,8 +1,6 @@
-from django.shortcuts import render, get_object_or_404
-from django.http import HttpRequest, HttpResponseRedirect
+from django.shortcuts import render, , get_object_or_404
+from django.http import HttpRequest, HttpResponseRedirect, HttpResponse
 from django.template import loader
-
-from django.contrib.auth.models import User
 
 from courses.forms import CourseForm, QuizForm
 from courses.models import *
@@ -10,17 +8,42 @@ from courses.models import *
 import logging
 logger = logging.getLogger(__name__)
 
-def course_detail(request, course_id):
+from django.template import loader
+from django.shortcuts import redirect
+from django.contrib.auth.models import User
+from django.contrib.auth import logout, authenticate, login
+from django.contrib.auth.forms import AuthenticationForm
+from django.contrib.auth.decorators import login_required, user_passes_test
+
+def view_course(request,course_id):
+	courseObj = Course.objects.get(id=course_id)
+	x = 3
+	modules = Module.objects.filter(course=courseObj).order_by("position")
+
+	template=loader.get_template('courseInfo.html')
+	context={'course': courseObj, 'modules': modules, 'enrollStatus': x, 'participant_id': request.user.id }
+	return HttpResponse(template.render(context,request))
+
+'''def course_detail(request, course_id):
     course = Course.objects.get(id=course_id)
     return render(request, 'courses/course_detail.html', {
         'course': course,
-    })
+    })'''
 
 def course_list(request):
     courses = Course.objects.all()
     return render(request, 'courses/course_list.html', {
         'courses': courses,
     })
+
+def loadComponents(request, course_id, module_id):
+    courseObj = Course.objects.get(id=course_id)    
+    moduleObj = Module.objects.get(id=module_id)
+    component_list = moduleObj.getComponents().order_by("position")
+    context = {'components': component_list}
+    print (context)
+    template = loader.get_template('componentList.html')
+    return HttpResponse(template.render(context,request))
 
 """
 Responsible for adding new courses
