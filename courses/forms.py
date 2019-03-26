@@ -1,5 +1,4 @@
 from django import forms
-
 from courses.models import Course, Module, Component, Question, Answer
 
 import logging
