@@ -1,8 +1,10 @@
 from django.shortcuts import render, get_object_or_404
 from django.http import HttpRequest, HttpResponseRedirect, HttpResponse
 from django.template import loader
+from django.contrib.auth.decorators import login_required, user_passes_test
+from django.urls import reverse
 
-from courses.forms import CourseForm, QuizForm
+from courses.forms import CourseForm, ModuleForm, QuizForm
 from courses.models import *
 
 import logging
@@ -13,7 +15,14 @@ from django.shortcuts import redirect
 from django.contrib.auth.models import User
 from django.contrib.auth import logout, authenticate, login
 from django.contrib.auth.forms import AuthenticationForm
-from django.contrib.auth.decorators import login_required, user_passes_test
+
+
+# USER IDENTITY HELPERS
+def is_instructor(user):
+    return Instructor.objects.filter(instructor_id=user.id).exists()
+
+# TODO: Create this function when Learner is defined
+# def is_learner(user):
 
 def view_course(request,course_id):
 	courseObj = Course.objects.get(id=course_id)
@@ -68,6 +77,50 @@ def home(request):
         'courses': courses,
     })
 
+# @login_required
+def module_list(request, course_id):
+    course = Course.objects.get(id=course_id)
+    modules = course.modules.order_by('index').all()
+
+    template = 'courses/module_list_learner.html'
+    if is_instructor(request.user):
+        template = 'courses/module_list_instructor.html'
+
+    return render(request, template, {
+        'modules': modules,
+        'course': course
+    })
+        
+
+    
+@user_passes_test(is_instructor)
+def edit_module(request, course_id, module_id=None):
+    # TODO: Restrict this to only instructors who own the course the module belongs to
+
+    course = Course.objects.get(id=course_id)
+
+    # process form data
+    if request.method == 'POST':
+        form = ModuleForm(request.POST, course_id=course_id)
+        if form.is_valid():
+            # FIXME 
+            form = form.save(commit=False)
+            form.course = course
+            form.save()
+            url = reverse("module_list", kwargs={'course_id': course_id})
+            return HttpResponseRedirect(url)
+
+    # if module_id:
+    #     module = Module.objects.get(id=module_id)
+
+    form = ModuleForm(course_id=course_id)
+
+    return render(request, 'courses/module_edit.html', {
+        'course': course,
+        # 'module': module,
+        'action_word': 'Add',
+        'form': form
+    })
 def take_quiz(request, quiz_id):
     quiz = Quiz.objects.get(id=quiz_id)
     questions=quiz.question_set.all()    
