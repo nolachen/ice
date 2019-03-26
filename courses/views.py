@@ -1,11 +1,21 @@
-from django.shortcuts import render
-from django.http import HttpRequest, HttpResponseRedirect
+from django.shortcuts import render, get_object_or_404
+from django.http import HttpRequest, HttpResponseRedirect, HttpResponse
 from django.template import loader
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.urls import reverse
 
-from courses.forms import CourseForm, ModuleForm
-from courses.models import Course, Module, Instructor
+from courses.forms import CourseForm, ModuleForm, QuizForm
+from courses.models import *
+
+import logging
+logger = logging.getLogger(__name__)
+
+from django.template import loader
+from django.shortcuts import redirect
+from django.contrib.auth.models import User
+from django.contrib.auth import logout, authenticate, login
+from django.contrib.auth.forms import AuthenticationForm
+
 
 # USER IDENTITY HELPERS
 def is_instructor(user):
@@ -14,17 +24,35 @@ def is_instructor(user):
 # TODO: Create this function when Learner is defined
 # def is_learner(user):
 
-def course_detail(request, course_id):
+def view_course(request,course_id):
+	courseObj = Course.objects.get(id=course_id)
+	x = 3
+	modules = Module.objects.filter(course=courseObj).order_by("position")
+
+	template=loader.get_template('courses/course_info.html')
+	context={'course': courseObj, 'modules': modules, 'enrollStatus': x, 'participant_id': request.user.id }
+	return HttpResponse(template.render(context,request))
+
+'''def course_detail(request, course_id):
     course = Course.objects.get(id=course_id)
     return render(request, 'courses/course_detail.html', {
         'course': course,
-    })
+    })'''
 
 def course_list(request):
     courses = Course.objects.all()
     return render(request, 'courses/course_list.html', {
         'courses': courses,
     })
+
+def loadComponents(request, course_id, module_id):
+    courseObj = Course.objects.get(id=course_id)    
+    moduleObj = Module.objects.get(id=module_id)
+    component_list = moduleObj.getComponents().order_by("position")
+    context = {'components': component_list}
+    print (context)
+    template = loader.get_template('courses/component_list.html')
+    return HttpResponse(template.render(context,request))
 
 """
 Responsible for adding new courses
@@ -92,4 +120,24 @@ def edit_module(request, course_id, module_id=None):
         # 'module': module,
         'action_word': 'Add',
         'form': form
+    })
+def take_quiz(request, quiz_id):
+    quiz = Quiz.objects.get(id=quiz_id)
+    questions=quiz.question_set.all()    
+    if request.method == "POST":
+        """
+        To be Implemented
+        form = QuizForm(request.POST, questions)
+        if form.is_valid(): ## Will only ensure the option exists, not correctness.
+            responses = []
+            for question in questions:
+                responses.append(form.cleaned_data[question])
+        """
+        return render(request, 'quiz/result.html', {
+            
+        })
+    else:
+        form = QuizForm(questions)
+    return render(request, 'quiz/take_quiz.html', {
+        "form": form,
     })
