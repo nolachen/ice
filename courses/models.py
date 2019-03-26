@@ -64,7 +64,7 @@ class Answer(models.Model):
 
 # Component Model
 class Component(models.Model):
-    course = models.ForeignKey(Course, on_delete=models.CASCADE)
+    course = models.ForeignKey(Course, related_name="components", on_delete=models.CASCADE)
 
     title = models.CharField(max_length=200)
     date_of_creation = models.DateField()

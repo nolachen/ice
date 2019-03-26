@@ -1,9 +1,17 @@
 from django.shortcuts import render
 from django.http import HttpRequest, HttpResponseRedirect
 from django.template import loader
+from django.contrib.auth.decorators import login_required, user_passes_test
 
 from courses.forms import CourseForm
-from courses.models import Course
+from courses.models import Course, Module, Instructor
+
+# USER IDENTITY HELPERS
+def is_instructor(user):
+    return Instructor.objects.filter(id=user.id).exists()
+
+# TODO: Create this function when Learner is defined
+# def is_learner(user):
 
 def course_detail(request, course_id):
     course = Course.objects.get(id=course_id)
