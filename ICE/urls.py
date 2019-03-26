@@ -28,7 +28,6 @@ urlpatterns = [
     path('course_list/', course_list),
     path('admin/', admin.site.urls),
     path('course_add/', course_add),
-    path('courses/', include('courses.urls'))
     path('take_quiz/<int:quiz_id>/', take_quiz),
     path('course_detail/<int:course_id>/', view_course, name='view_course'),
     path('course_detail/<int:course_id>/<int:module_id>/loadComponents/', loadComponents, name='loadComponents'),
