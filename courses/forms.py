@@ -1,6 +1,9 @@
 from django import forms
 
-from courses.models import Course
+from courses.models import Course, Question, Answer
+
+import logging
+logger = logging.getLogger(__name__)
 
 """
 For adding new courses
@@ -14,14 +17,21 @@ class CourseForm(forms.ModelForm):
 class QuizForm(forms.Form):
     def __init__(self, questions, *args, **kwargs):
         self.questions = questions
+        super(QuizForm, self).__init__(*args, **kwargs)
         for question in questions:
-            field_name = "question_%d" % question.pk
-            choices = ['test']
-            #for answer in question.answer_set().all():
-            #    choices.append((answer.pk, answer.answer_text,))
+            answer = Answer.objects.get(pk=question.id)
+            field_name = "question"
+            choices = (
+                ('A', 'choice 1'),
+                ('B', 'choice 2'),
+                ('C', 'choice 3')
+            )
+            """
+            for answer in Answer.objects.filter(question_id=question.question_id):
+                choices.append(answer.answer_text)
             ## May need to pass some initial data, etc:
-            field = forms.ChoiceField(label=question.question_text, required=True, 
+            """
+            self.fields[question] = forms.ChoiceField(label=question.question_text, required=True, 
                                         choices=choices, widget=forms.RadioSelect)
-        return super(QuizForm, self).__init__(*args, **kwargs)
     def save(self):
         pass

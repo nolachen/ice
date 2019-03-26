@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from django.http import HttpRequest, HttpResponseRedirect
 from django.template import loader
 
@@ -6,6 +6,9 @@ from django.contrib.auth.models import User
 
 from courses.forms import CourseForm, QuizForm
 from courses.models import *
+
+import logging
+logger = logging.getLogger(__name__)
 
 def course_detail(request, course_id):
     course = Course.objects.get(id=course_id)
@@ -43,13 +46,21 @@ def home(request):
     })
 
 def take_quiz(request, quiz_id):
-    quiz = Quiz.objects.get(id=quiz_id)
-    form = QuizForm(questions=quiz.question_set.all())
+    quiz = Quiz.objects.filter(id=quiz_id)
     if request.method == "POST":
-        form = QuizForm(request.POST, questions=quiz.question_set.all())
+        # To be Implemented
+        """
+        questions = quiz.question_set.all()
+        form = QuizForm(request.POST, questions)
         if form.is_valid(): ## Will only ensure the option exists, not correctness.
             attempt = form.save()
             return redirect(attempt)
+        """
+        return render(request, 'quiz/result.html')
+    else:
+        questions = Question.objects.filter(quiz_id=quiz_id)
+        form = QuizForm(questions)
     return render(request, 'quiz/take_quiz.html', {
-        "form": form
+        "form": form,
+        "questions": questions,
     })
