@@ -1,0 +1,10 @@
+<h1>{{ course.title }} > All Modules</h1>
+
+<div>
+    <ol>
+        {% for module in modules %}
+        <li> {{ module.title }}</li>
+        {% endfor %}
+    </ol>     
+    <a href="{% url 'create_module' %}">New module</a>    
+</div>

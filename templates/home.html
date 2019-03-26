@@ -6,7 +6,14 @@
 {% block content %}
 {% if user.is_authenticated %}
   Hi {{ user.username }}!
-  <p><a href="{% url 'logout' %}">logout</a></p>
+  <p>Available Courses</p>
+    <ol>
+    {% for course in courses %}
+    <li><a href="{% url 'course_detail' course.id %}">{{ course.name }}</a></li>
+    <p> {{ course.description }} <p>
+    {% endfor %}
+    </ol>
+  <p><a href="">logout</a></p>
 {% else %}
   <p>You are not logged in</p>
   <a href="{% url 'login' %}">login</a>
