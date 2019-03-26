@@ -46,21 +46,22 @@ def home(request):
     })
 
 def take_quiz(request, quiz_id):
-    quiz = Quiz.objects.filter(id=quiz_id)
+    quiz = Quiz.objects.get(id=quiz_id)
+    questions=quiz.question_set.all()    
     if request.method == "POST":
-        # To be Implemented
         """
-        questions = quiz.question_set.all()
+        To be Implemented
         form = QuizForm(request.POST, questions)
         if form.is_valid(): ## Will only ensure the option exists, not correctness.
-            attempt = form.save()
-            return redirect(attempt)
+            responses = []
+            for question in questions:
+                responses.append(form.cleaned_data[question])
         """
-        return render(request, 'quiz/result.html')
+        return render(request, 'quiz/result.html', {
+            
+        })
     else:
-        questions = Question.objects.filter(quiz_id=quiz_id)
         form = QuizForm(questions)
     return render(request, 'quiz/take_quiz.html', {
         "form": form,
-        "questions": questions,
     })

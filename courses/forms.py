@@ -17,21 +17,22 @@ class CourseForm(forms.ModelForm):
 class QuizForm(forms.Form):
     def __init__(self, questions, *args, **kwargs):
         self.questions = questions
+        
         super(QuizForm, self).__init__(*args, **kwargs)
         for question in questions:
-            answer = Answer.objects.get(pk=question.id)
-            field_name = "question"
             choices = (
                 ('A', 'choice 1'),
                 ('B', 'choice 2'),
-                ('C', 'choice 3')
+                ('C', 'choice 3'),
+                ('D', 'choice 4'),
+
             )
             """
             for answer in Answer.objects.filter(question_id=question.question_id):
                 choices.append(answer.answer_text)
             ## May need to pass some initial data, etc:
             """
-            self.fields[question] = forms.ChoiceField(label=question.question_text, required=True, 
+            self.fields[question] = forms.ChoiceField(label=question, required=True, 
                                         choices=choices, widget=forms.RadioSelect)
     def save(self):
         pass

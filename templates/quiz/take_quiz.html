@@ -1,5 +1,6 @@
 <form action="" method="POST">
     <h1>Quiz</h1>
+    <h3>This is quiz {{ quiz.course_id }}</h2>
     {% csrf_token %}
     {{ form }}
     <input type="submit" value="Submit">
