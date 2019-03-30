@@ -5,7 +5,7 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 from django.urls import reverse
 
 from courses.forms import CourseForm, ModuleForm, QuizForm
-from courses.models import Instructor, Course, Module, Quiz
+from courses.models import Instructor, Course, Module, Quiz, Answer
 
 import logging
 logger = logging.getLogger(__name__)
@@ -39,12 +39,6 @@ def view_course(request,course_id):
         'course': course,
     })'''
 
-def course_list(request):
-    courses = Course.objects.all()
-    return render(request, 'courses/course_list.html', {
-        'courses': courses,
-    })
-
 def loadComponents(request, course_id, module_id):
     courseObj = Course.objects.get(id=course_id)    
     moduleObj = Module.objects.get(id=module_id)
@@ -59,7 +53,8 @@ Responsible for adding new courses
 
 Utilized CourseForm which is in the file forms.py
 """
-def course_add(request):
+@user_passes_test(is_instructor)
+def new_course(request):
     if request.POST:
         form = CourseForm(request.POST)
         if form.is_valid():
@@ -121,23 +116,30 @@ def edit_module(request, course_id, module_id=None):
         'action_word': 'Add',
         'form': form
     })
+
 def take_quiz(request, quiz_id):
     quiz = Quiz.objects.get(id=quiz_id)
-    questions=quiz.question_set.all()    
+    questions = quiz.question_set.all()
     if request.method == "POST":
-        """
-        To be Implemented
-        form = QuizForm(request.POST, questions)
-        if form.is_valid(): ## Will only ensure the option exists, not correctness.
-            responses = []
+        form = QuizForm(quiz_id, request.POST)
+        if form.is_valid():
+            passed = False
+            num_of_correct = 0
             for question in questions:
-                responses.append(form.cleaned_data[question])
-        """
+                print('choice:', form.cleaned_data[str(question.id)])
+                print('answer:', Answer.objects.get(question_id=question.id).correct_answer_id)
+                # form.cleaned_data[str(question.id)] is in <class 'str'>
+                if ( int(form.cleaned_data[str(question.id)]) == (Answer.objects.get(question_id=question.id).correct_answer_id)):
+                    print('correct')
+                    num_of_correct += 1
+            if (num_of_correct >= quiz.num_questions * quiz.passing_score):
+                print('passed')
+                passed = True
         return render(request, 'quiz/result.html', {
-            
+            "passed": passed,
         })
     else:
-        form = QuizForm(questions)
+        form = QuizForm(quiz_id)
     return render(request, 'quiz/take_quiz.html', {
         "form": form,
     })

@@ -3,6 +3,8 @@ from django.urls import reverse
 from django.db import models
 from django.core.validators import MaxValueValidator, MinValueValidator
 
+class Learner(models.Model):
+    pass
 
 class Instructor(models.Model):
     instructor = models.OneToOneField(
@@ -74,14 +76,24 @@ class Question(models.Model):
     def get_absolute_url(self):
         return self.quiz.get_absolute_url()
 
-class Answer(models.Model):
-    # Each Question should have exactly 4 answers
+class Choice(models.Model):
+    # Each Question should have exactly 4 choices
     question = models.ForeignKey(Question, on_delete=models.CASCADE)
-    answer_text = models.TextField()
-    is_correct = models.BooleanField(default=False)
+    choice_text = models.TextField()
+    #is_correct = models.BooleanField(default=False)
 
     def __str__(self):
-        return self.answer_text
+        return self.choice_text
+
+class Answer(models.Model):
+    question = models.ForeignKey(Question, on_delete=models.CASCADE)
+    correct_answer = models.ForeignKey(Choice, on_delete=models.CASCADE, default=0)
+
+class QuizResult(models.Model):
+    quiz = models.ForeignKey(Module, on_delete=models.CASCADE)
+    learner = models.ForeignKey(Learner, on_delete=models.CASCADE)
+    result = models.CharField(max_length=20)
+    passed = models.BooleanField(default=False)
 
 # Component Model
 class Component(models.Model):

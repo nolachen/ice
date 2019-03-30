@@ -25,11 +25,10 @@ urlpatterns = [
     path('accounts/', include('accounts.urls')),
     path('accounts/', include('django.contrib.auth.urls')),
     path('accounts/signup/', signup, name='signup'),
-    path('course_list/', course_list),
     path('admin/', admin.site.urls),
-    path('course_add/', course_add),
     path('courses/', include('courses.urls')),
     path('take_quiz/<int:quiz_id>/', take_quiz),
+    # To be rewritten
     path('course_detail/<int:course_id>/', view_course, name='view_course'),
     path('course_detail/<int:course_id>/<int:module_id>/loadComponents/', loadComponents, name='loadComponents'),
 ]
