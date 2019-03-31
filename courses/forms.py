@@ -52,4 +52,3 @@ class QuizForm(forms.Form):
                 index = index + 1
             self.fields[str(question.id)] = forms.ChoiceField(label=question.question_text, required=True, 
                                         choices=choices, widget=forms.RadioSelect)
-            #print(self.fields[question.id])
