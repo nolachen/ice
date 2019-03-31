@@ -39,12 +39,6 @@ def view_course(request,course_id):
         'course': course,
     })'''
 
-def course_list(request):
-    courses = Course.objects.all()
-    return render(request, 'courses/course_list.html', {
-        'courses': courses,
-    })
-
 def loadComponents(request, course_id, module_id):
     courseObj = Course.objects.get(id=course_id)    
     moduleObj = Module.objects.get(id=module_id)
@@ -59,7 +53,8 @@ Responsible for adding new courses
 
 Utilized CourseForm which is in the file forms.py
 """
-def course_add(request):
+@user_passes_test(is_instructor)
+def new_course(request):
     if request.POST:
         form = CourseForm(request.POST)
         if form.is_valid():
