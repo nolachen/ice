@@ -1,8 +1,7 @@
 <h1>Quiz Result</h1>
 {% if passed == True %}
 <p>Quiz passed</p>
-<a href="{% url 'view_course' course_id %}">Continue</a>
 {% else %}
 <p>Quiz failed</p>
-<a href="{% url 'view_course' course_id %}">Retry</a>
 {% endif %}
+<a href="{% url 'courses:view_course' course_id %}">Back to course</a>

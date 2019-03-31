@@ -25,7 +25,7 @@
         <ul class="nav nav-tabs" id="modules">
           {% for module in modules %}
             <li role="presentation" id="{{ module.id }}">
-              <a data-toggle="tab" href="{% url 'courses:load_components' course.id module.id %}">{{ module.title }}</a>
+              <a data-toggle="tab" href="{% url 'courses:load_components' course_id=course.id module_id=module.id %}">{{ module.title }}</a>
             </li>
           {% endfor %}
         </ul>

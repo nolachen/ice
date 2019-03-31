@@ -35,8 +35,10 @@ def view_course(request, course_id):
 def load_components(request, course_id, module_id):  
     module = Module.objects.get(id=module_id)
     components = module.getComponents().order_by("index")
+    quiz = Quiz.objects.get(module_id=module_id)
     return render(request, 'courses/component_list.html', {
         'components': components,
+        'quiz': quiz,
     })
 
 """
@@ -113,7 +115,7 @@ def take_quiz(request, quiz_id):
     # Check if Learner already passed the quiz
     if (QuizResult.objects.filter(learner_id=request.user.id).exists()
             and QuizResult.objects.filter(quiz_id=quiz.id).exists()):
-        return render(request, 'quiz/take_quiz.html', {
+        return render(request, 'quiz/take.html', {
             "passed": True,
         })
 
@@ -137,7 +139,7 @@ def take_quiz(request, quiz_id):
         })
     else:
         form = QuizForm(quiz_id)
-    return render(request, 'quiz/take_quiz.html', {
+    return render(request, 'quiz/take.html', {
         "quiz": quiz,
         "form": form,
     })
