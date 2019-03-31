@@ -120,7 +120,7 @@ def edit_module(request, course_id, module_id=None):
 
 def take_quiz(request, quiz_id):
     quiz = Quiz.objects.get(id=quiz_id)
-    # Check if already passed
+    # Check if Learner already passed the quiz
     if (QuizResult.objects.filter(learner_id=request.user.id).exists()
             and QuizResult.objects.filter(quiz_id=quiz.id).exists()):
         return render(request, 'quiz/take_quiz.html', {
@@ -134,17 +134,11 @@ def take_quiz(request, quiz_id):
             passed = False
             num_of_correct = 0
             for question in questions:
-                print('choice:', form.cleaned_data[str(question.id)])
-                print('answer:', Answer.objects.get(question_id=question.id).correct_answer_id)
-                # form.cleaned_data[str(question.id)] is in <class 'str'>
                 if ( int(form.cleaned_data[str(question.id)]) == (Answer.objects.get(question_id=question.id).correct_answer_id)):
-                    print('correct')
                     num_of_correct += 1
             if (num_of_correct >= quiz.num_questions * quiz.passing_score):
-                print('passed')
                 passed = True
-                print(request.user.id)
-                record_passed_quiz(request.user.id, quiz.id)
+                QuizResult.record_passed_quiz(quiz.id, request.user.id)
 
         return render(request, 'quiz/result.html', {
             "course_id": quiz.course_id,
@@ -157,8 +151,3 @@ def take_quiz(request, quiz_id):
         "quiz": quiz,
         "form": form,
     })
-
-def record_passed_quiz(learner_id, quiz_id):
-    print('this is the learner_id', learner_id)
-    new_result = QuizResult(passed=True, learner_id=learner_id, quiz_id=quiz_id)
-    new_result.save()
