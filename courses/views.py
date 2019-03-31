@@ -25,28 +25,19 @@ def is_instructor(user):
 # def is_learner(user):
 
 def view_course(request,course_id):
-	courseObj = Course.objects.get(id=course_id)
-	x = 3
-	modules = Module.objects.filter(course=courseObj).order_by("index")
+    course_obj = Course.objects.get(id=course_id)
+    modules = Module.objects.filter(course=course_obj).order_by("index")
+    return render(request, 'courses/course_details.html', {
+        'course': course_obj,
+        'modules': modules,
+    })
 
-	template=loader.get_template('courses/course_info.html')
-	context={'course': courseObj, 'modules': modules, 'enrollStatus': x, 'participant_id': request.user.id }
-	return HttpResponse(template.render(context,request))
-
-'''def course_detail(request, course_id):
-    course = Course.objects.get(id=course_id)
-    return render(request, 'courses/course_detail.html', {
-        'course': course,
-    })'''
-
-def loadComponents(request, course_id, module_id):
-    courseObj = Course.objects.get(id=course_id)    
-    moduleObj = Module.objects.get(id=module_id)
-    component_list = moduleObj.getComponents().order_by("index")
-    context = {'components': component_list}
-    print (context)
-    template = loader.get_template('courses/component_list.html')
-    return HttpResponse(template.render(context,request))
+def load_components(request, course_id, module_id):  
+    module_obj = Module.objects.get(id=module_id)
+    component_list = module_obj.getComponents().order_by("index")
+    return render(request, 'courses/component_list.html', {
+        'components': component_list,
+    })
 
 """
 Responsible for adding new courses
