@@ -1,0 +1,42 @@
+{% load staticfiles %}
+<script  src="{% static 'jquery-3.3.1.min.js' %}"></script>
+<head>
+  <title>Course Details</title>
+</head>
+
+<script>
+</script>
+
+<div class="container" style="padding-top:10px">
+  <h4>Course Information</h4>
+  <div class="row well">
+    <div class="col-md-12">
+
+      {% if course %}
+      <p> Name: {{ course.name }}</p>
+      <p> Category: {{ course.category }}</p>
+      <p> Insructor: {{ course.instructor_name }}</p>
+      <p> Description: {{ course.description }}</p>
+
+      </br>
+      
+      <h4> Modules </h4>
+      <div id="moduleContainer">
+        <ul class="nav nav-tabs" id="modules">
+          {% for module in modules %}
+            <li role="presentation" id="{{ module.id }}">
+              <a data-toggle="tab" href="{% url 'courses:load_components' course.id module.id %}">{{ module.title }}</a>
+            </li>
+          {% endfor %}
+        </ul>
+      </div>
+
+      </br>
+      
+      {% else %}
+      <p>No course information available for this course</p>
+      {% endif %}
+
+    </div>
+  </div>
+</div>

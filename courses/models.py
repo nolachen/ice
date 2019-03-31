@@ -15,6 +15,7 @@ class Instructor(models.Model):
         on_delete=models.CASCADE
     )
     name = models.CharField(default='', max_length=200)
+
 class Course(models.Model):
     name = models.CharField(max_length=200)
     #instructor = models.ForeignKey(Instructor, on_delete=models.CASCADE)
@@ -55,7 +56,7 @@ class Module(models.Model):
         super(Module, self).save(*args, **kwargs)
     
     def getComponents(self):
-        return Component.objects.filter(module=self)
+        return TextComponent.objects.filter(module=self)
 
 class Quiz(models.Model):
     title = models.CharField(max_length=200)

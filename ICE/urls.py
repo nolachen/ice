@@ -28,9 +28,6 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('courses/', include('courses.urls')),
     path('take_quiz/<int:quiz_id>/', take_quiz),
-    # To be rewritten
-    path('course_detail/<int:course_id>/', view_course, name='view_course'),
-    path('course_detail/<int:course_id>/<int:module_id>/loadComponents/', loadComponents, name='loadComponents'),
 ]
 
 if settings.DEBUG:

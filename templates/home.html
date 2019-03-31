@@ -9,13 +9,13 @@
   <p>Available Courses</p>
     <ol>
     {% for course in courses %}
-    <li><a href="{% url 'view_course' course.id %}">{{ course.name }}</a></li>
+    <li><a href="{% url 'courses:view_course' course.id %}">{{ course.name }}</a></li>
     <p> {{ course.description }} <p>
     {% endfor %}
     </ol>
-  <p><a href="">logout</a></p>
+  <p><a href="{% url 'logout' %}">logout</a></p>
 {% else %}
-  <p>You are not logged in</p>
+  <p class="alt-text">You are not logged in</p>
   <a href="{% url 'login' %}">login</a>
   <a href="{% url 'signup' %}">signup</a>
 {% endif %}
