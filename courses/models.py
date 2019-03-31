@@ -98,6 +98,10 @@ class QuizResult(models.Model):
     result = models.CharField(max_length=20)
     passed = models.BooleanField(default=False)
 
+    def record_passed_quiz(quiz_id, learner_id):
+        new_result = QuizResult(quiz_id=quiz_id, learner_id=learner_id, passed=True)
+        new_result.save()
+
 # Component Model
 class Component(models.Model):
     course = models.ForeignKey(Course, related_name="%(class)ss", on_delete=models.CASCADE)
