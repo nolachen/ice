@@ -6,3 +6,4 @@
 		<a data-toggle="tab" id="{{ component.id }}">{{ component.title }}</a>
 	</li>
 {% endfor %}
+<p><a href="{% url 'courses:take_quiz' quiz.id %}">Quiz</a></p>
