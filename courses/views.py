@@ -25,10 +25,10 @@ def is_instructor(user):
 # def is_learner(user):
 
 def view_course(request,course_id):
-    course_obj = Course.objects.get(id=course_id)
-    modules = Module.objects.filter(course=course_obj).order_by("index")
+    course = Course.objects.get(id=course_id)
+    modules = Module.objects.filter(course=course).order_by("index")
     return render(request, 'courses/course_details.html', {
-        'course': course_obj,
+        'course': course,
         'modules': modules,
     })
 
