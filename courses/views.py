@@ -21,8 +21,8 @@ from django.contrib.auth.forms import AuthenticationForm
 def is_instructor(user):
     return Instructor.objects.filter(instructor_id=user.id).exists()
 
-# TODO: Create this function when Learner is defined
-# def is_learner(user):
+def is_learner(user):
+    return Learner.objects.filter(learner_id=user.id).exists()
 
 def view_course(request, course_id):
     course = Course.objects.get(id=course_id)
@@ -112,6 +112,7 @@ def edit_module(request, course_id, module_id=None):
         'form': form
     })
 
+@user_passes_test(is_learner)
 def take_quiz(request, course_id, module_id, quiz_id):
     quiz = Quiz.objects.get(id=quiz_id)
     # Check if Learner already passed the quiz
