@@ -86,7 +86,6 @@ class Choice(models.Model):
     # Each Question should have exactly 4 choices
     question = models.ForeignKey(Question, on_delete=models.CASCADE)
     choice_text = models.TextField()
-    #is_correct = models.BooleanField(default=False)
 
     def __str__(self):
         return self.choice_text
@@ -98,11 +97,14 @@ class Answer(models.Model):
 class QuizResult(models.Model):
     quiz = models.ForeignKey(Module, on_delete=models.CASCADE)
     learner = models.ForeignKey(Learner, on_delete=models.CASCADE)
-    result = models.CharField(max_length=20)
+    # Result will be stored in the form of over a hundred
+    # For example, if a learner score 4 out of 5 questions, the result stored will be 80.0
+    result = models.FloatField(validators=[MaxValueValidator(100), MinValueValidator(0)])
     passed = models.BooleanField(default=False)
+    timestamp = models.DateTimeField(auto_now_add=True)
 
-    def record_passed_quiz(quiz_id, learner_id):
-        new_result = QuizResult(quiz_id=quiz_id, learner_id=learner_id, passed=True)
+    def new_record(quiz_id, learner_id, result, passed):
+        new_result = QuizResult(quiz_id=quiz_id, learner_id=learner_id, result=result, passed=passed)
         new_result.save()
 
 # Component Model

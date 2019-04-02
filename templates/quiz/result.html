@@ -4,4 +4,6 @@
 {% else %}
 <p>Quiz failed</p>
 {% endif %}
+<p>Your score: {{ score }} </p>
+<p>Passing score: {{ quiz.passing_score }} </p>
 <a href="{% url 'courses:view_course' course_id %}">Back to course</a>
