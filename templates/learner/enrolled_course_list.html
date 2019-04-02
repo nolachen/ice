@@ -1,0 +1,31 @@
+{% load staticfiles %}
+<head>
+  <title>All Courses</title>
+</head>
+
+<div class="container" style="padding-top:10px">
+  <h4>All Courses</h4>
+  <div class="row well">
+    <div class="col-md-12">
+
+      {% if enrolled_course %}
+      <div class="container">
+        <h4>Enrolled Course</h4>
+        <div class="row well">
+          <div class="enrolled-course">
+            {% for course in enrolled_course %}
+              <a href="{% url 'courses:view_course' course_id=course.id %}">{{ course.name }}</a>
+              <br>
+              <br>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+      
+      {% else %}
+      <p>No enrolled course available</p>
+      {% endif %}
+
+    </div>
+  </div>
+</div>

@@ -3,7 +3,6 @@ from django.urls import reverse
 from django.db import models
 from django.core.validators import MaxValueValidator, MinValueValidator
 
-
 class Instructor(models.Model):
     instructor = models.OneToOneField(
         User,
@@ -31,6 +30,14 @@ class Course(models.Model):
 
     def get_absolute_url(self):
         return reverse('course_detail', args=(self.id, ))
+
+class Learner(models.Model):
+    learner = models.OneToOneField(
+        User,
+        on_delete=models.CASCADE,
+        null=True
+    )
+    name = models.CharField(default='', max_length=200)
 
 class Module(models.Model):
     course = models.ForeignKey(Course, related_name='modules', on_delete=models.CASCADE)
@@ -108,3 +115,13 @@ class TextComponent(Component):
 
 class ImageComponent(Component):
     image_details = models.CharField(max_length=200)
+
+class Enrolment(models.Model):
+    course = models.ForeignKey(Course, on_delete=models.CASCADE, null=True, blank=True)
+    learner = models.ForeignKey(Learner, on_delete=models.CASCADE)
+    completed = models.BooleanField(default=False)
+    completed_date = models.DateField(null=True, blank=True)
+
+    def update_date(self, date):
+        self.completed_date = date 
+        self.save()
