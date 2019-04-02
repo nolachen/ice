@@ -38,6 +38,8 @@ def load_components(request, course_id, module_id):
     quiz = Quiz.objects.get(module_id=module_id)
     return render(request, 'courses/component_list.html', {
         'components': components,
+        'course_id': course_id,
+        'module_id': module_id,
         'quiz': quiz,
     })
 
@@ -110,11 +112,11 @@ def edit_module(request, course_id, module_id=None):
         'form': form
     })
 
-def take_quiz(request, quiz_id):
+def take_quiz(request, course_id, module_id, quiz_id):
     quiz = Quiz.objects.get(id=quiz_id)
     # Check if Learner already passed the quiz
-    if (QuizResult.objects.filter(learner_id=request.user.id).exists()
-            and QuizResult.objects.filter(quiz_id=quiz.id).exists()):
+    quiz_result = QuizResult.objects.filter(learner_id=request.user.id, quiz_id=quiz.id)
+    if quiz_result.filter(passed=True).exists():
         return render(request, 'quiz/take.html', {
             "passed": True,
         })
@@ -128,14 +130,19 @@ def take_quiz(request, quiz_id):
             for question in questions:
                 if ( int(form.cleaned_data[str(question.id)]) == (Answer.objects.get(question_id=question.id).correct_answer_id)):
                     num_of_correct += 1
-            if (num_of_correct >= quiz.num_questions * quiz.passing_score):
+            if (num_of_correct >= quiz.passing_score * quiz.num_questions / 100):
                 passed = True
-                QuizResult.record_passed_quiz(quiz.id, request.user.id)
+            else:
+                passed = False
+            
+            QuizResult.new_record(quiz.id, request.user.id, num_of_correct / quiz.num_questions * 100, passed)
 
         return render(request, 'quiz/result.html', {
             "course_id": quiz.course_id,
             "quiz": quiz,
             "passed": passed,
+            "score": num_of_correct / quiz.num_questions * 100,
+            "passing_score": quiz.passing_score * quiz.num_questions,
         })
     else:
         form = QuizForm(quiz_id)
