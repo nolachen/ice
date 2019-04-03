@@ -97,7 +97,6 @@ class Component(models.Model):
     index = models.IntegerField()
 
     class Meta:
-        abstract = True
         ordering = ['index']
 
     def __str__(self):
