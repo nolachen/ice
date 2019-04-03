@@ -3,6 +3,11 @@ from django.urls import reverse
 from django.db import models
 from django.core.validators import MaxValueValidator, MinValueValidator
 
+class Learner(models.Model):
+    learner = models.OneToOneField(
+        User,
+        on_delete=models.CASCADE
+    )
 
 class Instructor(models.Model):
     instructor = models.OneToOneField(
@@ -75,14 +80,30 @@ class Question(models.Model):
     def get_absolute_url(self):
         return self.quiz.get_absolute_url()
 
-class Answer(models.Model):
-    # Each Question should have exactly 4 answers
+class Choice(models.Model):
+    # Each Question should have exactly 4 choices
     question = models.ForeignKey(Question, on_delete=models.CASCADE)
-    answer_text = models.TextField()
-    is_correct = models.BooleanField(default=False)
+    choice_text = models.TextField()
 
     def __str__(self):
-        return self.answer_text
+        return self.choice_text
+
+class Answer(models.Model):
+    question = models.ForeignKey(Question, on_delete=models.CASCADE)
+    correct_answer = models.ForeignKey(Choice, on_delete=models.CASCADE, default=0)
+
+class QuizResult(models.Model):
+    quiz = models.ForeignKey(Module, on_delete=models.CASCADE)
+    learner = models.ForeignKey(Learner, on_delete=models.CASCADE)
+    # Result will be stored in the form of over a hundred
+    # For example, if a learner score 4 out of 5 questions, the result stored will be 80.0
+    result = models.FloatField(validators=[MaxValueValidator(100), MinValueValidator(0)])
+    passed = models.BooleanField(default=False)
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+    def new_record(quiz_id, learner_id, result, passed):
+        new_result = QuizResult(quiz_id=quiz_id, learner_id=learner_id, result=result, passed=passed)
+        new_result.save()
 
 # Component Model
 class Component(models.Model):
