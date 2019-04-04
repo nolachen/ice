@@ -77,8 +77,6 @@ def module_list(request, course_id):
         'course': course
     })
         
-
-    
 @user_passes_test(is_instructor)
 def edit_module(request, course_id, module_id=None):
     # TODO: Restrict this to only instructors who own the course the module belongs to
@@ -127,3 +125,14 @@ def take_quiz(request, quiz_id):
     return render(request, 'quiz/take_quiz.html', {
         "form": form,
     })
+
+@user_passes_test(is_instructor)
+def upload_image(request):
+    if request.method == 'POST':
+        form = ImageUpload(request.POST, request.FILES)
+        if form.is_valid():
+            form.save()
+            return HttpResponse('image upload success')
+        else:
+            return HttpResponseForbidden('allowed only via POST')
+        

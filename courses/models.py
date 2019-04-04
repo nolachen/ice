@@ -1,6 +1,7 @@
 from django.contrib.auth.models import User
 from django.urls import reverse
 from django.db import models
+from django import forms
 from django.core.validators import MaxValueValidator, MinValueValidator
 
 
@@ -107,3 +108,7 @@ class TextComponent(Component):
 
 class ImageComponent(Component):
     image_details = models.CharField(max_length=200)
+    image = models.ImageField(upload_to='media/')
+
+class ImageUpload(forms.ModelForm):
+    image = forms.ImageField()
