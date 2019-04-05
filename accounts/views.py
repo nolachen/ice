@@ -21,6 +21,9 @@ from courses.models import Learner, Instructor
 def is_superuser(user):
     return User.objects.get(id=user.id).is_superuser == 1
 
+"""
+For Learners only, Staff ID needed.
+"""
 def signup(request):
     if request.method == 'POST':
         form = SignupForm(request.POST)
@@ -51,6 +54,9 @@ def signup(request):
         'form': form
     })
 
+"""
+For sending out invitation email (which contains a token link) to Instructors
+"""
 @login_required
 @user_passes_test(is_superuser)
 def invite(request):
@@ -83,6 +89,10 @@ def invite(request):
         'form': form
     })
 
+"""
+For activating both Learners and Instructors account,
+they will be disginushed according to the 'is_staff' attribute
+"""
 def activate(request, uidb64, token):
     try:
         uid = force_text(urlsafe_base64_decode(uidb64))
