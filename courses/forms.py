@@ -1,5 +1,5 @@
 from django import forms
-from courses.models import Course, Module, Component, Question, Answer
+from courses.models import Course, Module, Component, Question, Answer, Choice, Quiz
 
 import logging
 logger = logging.getLogger(__name__)
@@ -39,24 +39,16 @@ class ModuleForm(forms.ModelForm):
         )
 
 class QuizForm(forms.Form):
-    def __init__(self, questions, *args, **kwargs):
-        self.questions = questions
-        
+    def __init__(self, quiz_id, *args, **kwargs):
+        quiz = Quiz.objects.get(id=quiz_id)
+        questions = quiz.question_set.all()
         super(QuizForm, self).__init__(*args, **kwargs)
         for question in questions:
-            choices = (
-                ('A', 'choice 1'),
-                ('B', 'choice 2'),
-                ('C', 'choice 3'),
-                ('D', 'choice 4'),
-            )
-            
-            """
-            for answer in Answer.objects.filter(question_id=question.question_id):
-                choices.append(answer.answer_text)
-            ## May need to pass some initial data, etc:
-            """
-            self.fields[question] = forms.ChoiceField(label=question, required=True, 
+            field_name = question.id
+            choices = []
+            index = 0
+            for choice in Choice.objects.filter(question_id=question.id):
+                choices.append((choice.id, choice.choice_text))
+                index = index + 1
+            self.fields[str(question.id)] = forms.ChoiceField(label=question.question_text, required=True, 
                                         choices=choices, widget=forms.RadioSelect)
-    def save(self):
-        pass
