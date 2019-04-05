@@ -16,11 +16,18 @@ class Instructor(models.Model):
     )
     autobiography = models.TextField(default='')
 
+class Category(models.Model):
+    name = models.CharField(max_length=50)
+
+    def __str__(self):
+        return self.name
+
 class Course(models.Model):
     name = models.CharField(max_length=200)
-    #instructor = models.ForeignKey(Instructor, on_delete=models.CASCADE)
-    instructor_name = models.TextField(default='')
-    category = models.TextField(default='')
+    instructor = models.ForeignKey(Instructor, on_delete=models.CASCADE)
+    #instructor_name = models.TextField(default='')
+    cecu_value = models.IntegerField()
+    category = models.ForeignKey(Category, on_delete=models.CASCADE)
     description = models.TextField(default='')
     deployed = models.BooleanField(default=False)
 
@@ -35,7 +42,7 @@ class Course(models.Model):
         new_module.save()
 
     def get_absolute_url(self):
-        return reverse('course_detail', args=(self.id, ))
+        return reverse("courses:view_course", args={self.id})
 
 class Module(models.Model):
     course = models.ForeignKey(Course, related_name='modules', on_delete=models.CASCADE)

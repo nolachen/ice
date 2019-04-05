@@ -8,10 +8,9 @@ logger = logging.getLogger(__name__)
 For adding new courses
 """
 class CourseForm(forms.ModelForm):
-
     class Meta:
         model = Course
-        fields = ['name', 'description']
+        fields = ['name', 'cecu_value', 'description', 'category']
 
 class ModuleForm(forms.ModelForm):
     class Meta:
