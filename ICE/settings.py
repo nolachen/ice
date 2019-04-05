@@ -126,3 +126,9 @@ STATIC_URL = '/static/'
 
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/'
+
+EMAIL_USE_TLS = True
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_HOST_USER = 'comp3297e@gmail.com'
+EMAIL_HOST_PASSWORD = 'icesystememail'
+EMAIL_PORT = 587

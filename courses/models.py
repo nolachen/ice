@@ -14,7 +14,7 @@ class Instructor(models.Model):
         User,
         on_delete=models.CASCADE
     )
-    name = models.CharField(default='', max_length=200)
+    autobiography = models.TextField(default='')
 
 class Course(models.Model):
     name = models.CharField(max_length=200)
