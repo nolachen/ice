@@ -116,13 +116,19 @@ class Component(models.Model):
     date_of_last_update = models.DateField(auto_now=True)
 
     # Order within the module
-    # index = models.IntegerField()
+    index = models.IntegerField()
 
-    # class Meta:
-    #     ordering = ['index']
+    class Meta:
+        ordering = ['index']
 
     def __str__(self):
         return self.title
+
+    def save(self, *args, **kwargs):
+        if not self.index:
+            # Default the index to the last one in the sequence
+            self.index = self.course.components.count() - 1
+        super(Component, self).save(*args, **kwargs)
 
 class TextComponent(Component):
     text_passage = models.TextField()
