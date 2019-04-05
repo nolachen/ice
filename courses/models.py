@@ -116,7 +116,7 @@ class TextComponent(Component):
 class ImageComponent(Component):
     image_details = models.CharField(max_length=200)
 
-class Enrolment(models.Model):
+class Enrollment(models.Model):
     course = models.ForeignKey(Course, on_delete=models.CASCADE, null=True, blank=True)
     learner = models.ForeignKey(Learner, on_delete=models.CASCADE)
     completed = models.BooleanField(default=False)

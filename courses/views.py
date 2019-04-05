@@ -5,7 +5,7 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 from django.urls import reverse
 
 from courses.forms import CourseForm, ModuleForm, QuizForm
-from courses.models import Instructor, Course, Module, Quiz, Learner, Enrolment
+from courses.models import Instructor, Course, Module, Quiz, Learner, Enrollment
 
 import logging
 logger = logging.getLogger(__name__)
@@ -42,9 +42,9 @@ def load_components(request, course_id, module_id):
 def view_enrolled_course(request):
     learner = Learner.objects.get(id=1) # to be changed after djando authentication done
     enrolled_course = []
-    enrolments = Enrolment.objects.filter(learner=learner)
-    for enrolment in enrolments:
-        enrolled_course.append(Course.objects.get(enrolment=enrolment))
+    enrollments = Enrollment.objects.filter(learner=learner)
+    for enrollment in enrollments:
+        enrolled_course.append(Course.objects.get(enrollment=enrollment))
     return render(request, 'learner/enrolled_course_list.html', {
         'enrolled_course': enrolled_course,
     })
