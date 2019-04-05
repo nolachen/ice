@@ -1,13 +1,14 @@
 <head>
-    <title>Course Details</title>
+    <title>Create Image Component</title>
 </head>
-
 <div>
     <h2>Create an Image Component</h2>
     <p>Upload an image and add a short description.</p>
     <form method="post" enctype="multipart/form-data">
         {% csrf_token %}
-        {{ form.as_p }}
+        <label for="description">Description</label>
+        <input type="text" name="image_details">
+        <input type="file" name="image">
         <button type="submit">Upload</button>
     </form>
 </div>

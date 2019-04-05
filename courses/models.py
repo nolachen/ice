@@ -116,10 +116,10 @@ class Component(models.Model):
     date_of_last_update = models.DateField(auto_now=True)
 
     # Order within the module
-    index = models.IntegerField()
+    # index = models.IntegerField()
 
-    class Meta:
-        ordering = ['index']
+    # class Meta:
+    #     ordering = ['index']
 
     def __str__(self):
         return self.title
@@ -129,7 +129,4 @@ class TextComponent(Component):
 
 class ImageComponent(Component):
     image_details = models.CharField(max_length=200)
-    image = models.ImageField(upload_to='media/')
-
-class ImageUpload(forms.ModelForm):
-    image = forms.ImageField()
+    image = models.ImageField(default=None, blank=True, null=True, upload_to='images/')

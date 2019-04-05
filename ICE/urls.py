@@ -27,7 +27,6 @@ urlpatterns = [
     path('accounts/signup/', signup, name='signup'),
     path('admin/', admin.site.urls),
     path('courses/', include('courses.urls')),
-    path('create_component/', upload_image),
 ]
 
 if settings.DEBUG:

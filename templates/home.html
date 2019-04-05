@@ -1,10 +1,14 @@
 <!-- templates/home.html-->
 {% extends 'base.html' %}
+{% load user_filters %}
 
 {% block title %}Home{% endblock %}
 
 {% block content %}
 {% if user.is_authenticated %}
+  {% if user|is_instructor %}
+    <a href="{% url 'courses:new_course' %}">Create Course</a>
+  {% endif %}
   Hi {{ user.username }}!
   <p>Available Courses</p>
     <ol>
