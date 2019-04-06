@@ -179,12 +179,15 @@ def upload_image(request, course_id):
             form.save()
             return render(request, 'courses/component_details.html', {
                 'course_id': course_id,
+                'course': course,
+                'form': form,
             })
         else:
             raise Http404
 
         return render(request, 'courses/component_details.html', {
             'course_id': course_id,
+            'course': course,
         })
     else:
         form = ImageUploadForm(request.POST, request.FILES, course_id=course_id)
@@ -192,4 +195,5 @@ def upload_image(request, course_id):
     return render(request, 'courses/create_image_component.html', { 
         'form': form,
         'course_id': course_id, 
+        'course': course,
     })

@@ -4,7 +4,7 @@
 <div>
     <h2>Create an Image Component</h2>
     <p>Upload an image and add a short description.</p>
-    <form method="post" enctype="multipart/form-data">
+    <form method="post" enctype="multipart/form-data" action="">
         {% csrf_token %}
         <label for="description">Description</label>
         <input type="text" name="image_details">
