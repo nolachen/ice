@@ -19,14 +19,14 @@ from django.contrib.auth.forms import AuthenticationForm
 
 # USER IDENTITY HELPERS
 def is_instructor(user):
-    return Instructor.objects.filter(instructor_id=user.id).exists()
+    return Instructor.objects.filter(user_id=user.id).exists()
 
 def is_learner(user):
-    return Learner.objects.filter(learner_id=user.id).exists()
+    return Learner.objects.filter(user_id=user.id).exists()
 
 @login_required
 def view_course(request, course_id):
-    learner = Learner.objects.get(learner=request.user)
+    learner = Learner.objects.get(user=request.user)
     course = Course.objects.get(id=course_id)
     modules = course.modules.order_by('index').all()
     available_modules = []
@@ -41,8 +41,6 @@ def view_course(request, course_id):
             module_index = list(modules).index(module) + 1
             locked_modules = modules[module_index:]
             break
-    print(available_modules)
-    print(locked_modules)
     return render(request, 'courses/course_details.html', {
         'course': course,
         'available_modules': available_modules,
@@ -102,7 +100,7 @@ def module_list(request, course_id):
 
 @user_passes_test(is_learner)
 def view_enrolled_course(request):
-    learner = Learner.objects.get(learner=request.user)
+    learner = Learner.objects.get(user=request.user)
     enrolled_course = []
     enrollments = Enrollment.objects.filter(learner=learner)
     for enrollment in enrollments:
@@ -144,7 +142,7 @@ def edit_module(request, course_id, module_id=None):
 
 @user_passes_test(is_learner)
 def take_quiz(request, course_id, module_id, quiz_id):
-    learner = Learner.objects.get(learner=request.user)
+    learner = Learner.objects.get(user=request.user)
     quiz = Quiz.objects.get(id=quiz_id)
     # Check if Learner already passed the quiz
     quiz_result = QuizResult.objects.filter(learner=learner, quiz_id=quiz.id)
