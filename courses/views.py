@@ -43,9 +43,8 @@ def load_components(request, course_id, module_id):
         'quiz': quiz,
     })
 
-@user_passes_test(is_learner)
 def view_enrolled_course(request):
-    learner = Learner.objects.get(learner_id=request.user.id)
+    learner = Learner.objects.get(id=1) # to be changed after djando authentication done
     enrolled_course = []
     enrollments = Enrollment.objects.filter(learner=learner)
     for enrollment in enrollments:
