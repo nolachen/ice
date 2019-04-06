@@ -100,7 +100,7 @@ def module_list(request, course_id):
         'course': course
     })
 
-@user_passes_test(is_learner)
+@login_required
 def view_enrolled_course(request):
     learner = Learner.objects.get(learner=request.user)
     enrolled_course = []
@@ -144,9 +144,10 @@ def edit_module(request, course_id, module_id=None):
 
 @user_passes_test(is_learner)
 def take_quiz(request, course_id, module_id, quiz_id):
+    learner = Learner.objects.get(learner=request.user)
     quiz = Quiz.objects.get(id=quiz_id)
     # Check if Learner already passed the quiz
-    quiz_result = QuizResult.objects.filter(learner_id=request.user.id, quiz_id=quiz.id)
+    quiz_result = QuizResult.objects.filter(learner=learner, quiz_id=quiz.id)
     if quiz_result.filter(passed=True).exists():
         return render(request, 'quiz/take.html', {
             "passed": True,
@@ -166,7 +167,7 @@ def take_quiz(request, course_id, module_id, quiz_id):
             else:
                 passed = False
             
-            QuizResult.new_record(quiz.id, request.user.id, num_of_correct / quiz.num_questions * 100, passed)
+            QuizResult.new_record(quiz.id, learner, num_of_correct / quiz.num_questions * 100, passed)
         else:
             raise Http404
 
