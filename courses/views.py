@@ -5,7 +5,7 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 from django.urls import reverse
 
 from courses.forms import CourseForm, ModuleForm, QuizForm
-from courses.models import Instructor, Learner, Course, Module, Quiz, Answer, QuizResult
+from courses.models import *
 
 import logging
 logger = logging.getLogger(__name__)
@@ -82,9 +82,18 @@ def module_list(request, course_id):
         'modules': modules,
         'course': course
     })
-        
 
-    
+@user_passes_test(is_learner)
+def view_enrolled_course(request):
+    learner = Learner.objects.get(learner=request.user)
+    enrolled_course = []
+    enrollments = Enrollment.objects.filter(learner=learner)
+    for enrollment in enrollments:
+        enrolled_course.append(Course.objects.get(enrollment=enrollment))
+    return render(request, 'courses/enrolled_course_list.html', {
+        'enrolled_course': enrolled_course,
+    })
+
 @user_passes_test(is_instructor)
 def edit_module(request, course_id, module_id=None):
     # TODO: Restrict this to only instructors who own the course the module belongs to
