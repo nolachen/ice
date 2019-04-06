@@ -24,7 +24,7 @@ def is_instructor(user):
 def is_learner(user):
     return Learner.objects.filter(learner_id=user.id).exists()
 
-@user_passes_test(is_learner)
+@login_required
 def view_course(request, course_id):
     learner = Learner.objects.get(learner=request.user)
     course = Course.objects.get(id=course_id)
@@ -100,7 +100,7 @@ def module_list(request, course_id):
         'course': course
     })
 
-@login_required
+@user_passes_test(is_learner)
 def view_enrolled_course(request):
     learner = Learner.objects.get(learner=request.user)
     enrolled_course = []
