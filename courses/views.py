@@ -24,12 +24,29 @@ def is_instructor(user):
 def is_learner(user):
     return Learner.objects.filter(learner_id=user.id).exists()
 
+@login_required
 def view_course(request, course_id):
+    learner = Learner.objects.get(learner=request.user)
     course = Course.objects.get(id=course_id)
     modules = course.modules.order_by('index').all()
+    available_modules = []
+    locked_modules = []
+    for module in modules:
+        quiz = Quiz.objects.get(module=module)
+        quiz_result = QuizResult.objects.filter(learner=learner, quiz_id=quiz.id)
+        if quiz_result.filter(passed=True).exists():
+            available_modules.append(module)
+        else:
+            available_modules.append(module)
+            module_index = list(modules).index(module) + 1
+            locked_modules = modules[module_index:]
+            break
+    print(available_modules)
+    print(locked_modules)
     return render(request, 'courses/course_details.html', {
         'course': course,
-        'modules': modules,
+        'available_modules': available_modules,
+        'locked_modules': locked_modules,
     })
 
 def load_components(request, course_id, module_id):  
@@ -127,9 +144,10 @@ def edit_module(request, course_id, module_id=None):
 
 @user_passes_test(is_learner)
 def take_quiz(request, course_id, module_id, quiz_id):
+    learner = Learner.objects.get(learner=request.user)
     quiz = Quiz.objects.get(id=quiz_id)
     # Check if Learner already passed the quiz
-    quiz_result = QuizResult.objects.filter(learner_id=request.user.id, quiz_id=quiz.id)
+    quiz_result = QuizResult.objects.filter(learner=learner, quiz_id=quiz.id)
     if quiz_result.filter(passed=True).exists():
         return render(request, 'quiz/take.html', {
             "passed": True,
@@ -149,7 +167,7 @@ def take_quiz(request, course_id, module_id, quiz_id):
             else:
                 passed = False
             
-            QuizResult.new_record(quiz.id, request.user.id, num_of_correct / quiz.num_questions * 100, passed)
+            QuizResult.new_record(quiz.id, learner, num_of_correct / quiz.num_questions * 100, passed)
         else:
             raise Http404
 

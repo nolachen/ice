@@ -99,8 +99,8 @@ class QuizResult(models.Model):
     passed = models.BooleanField(default=False)
     timestamp = models.DateTimeField(auto_now_add=True)
 
-    def new_record(quiz_id, learner_id, result, passed):
-        new_result = QuizResult(quiz_id=quiz_id, learner_id=learner_id, result=result, passed=passed)
+    def new_record(quiz_id, learner, result, passed):
+        new_result = QuizResult(quiz_id=quiz_id, learner=learner, result=result, passed=passed)
         new_result.save()
 
 # Component Model
