@@ -28,6 +28,10 @@ def is_learner(user):
 def view_course(request, course_id):
     learner = Learner.objects.get(user=request.user)
     course = Course.objects.get(id=course_id)
+    is_enrolled = False
+    enrollments = Enrollment.objects.filter(learner=learner)
+    if enrollments.filter(course=course).exists():
+        is_enrolled = True
     modules = course.modules.order_by('index').all()
     available_modules = []
     locked_modules = []
@@ -43,6 +47,7 @@ def view_course(request, course_id):
             break
     return render(request, 'courses/course_details.html', {
         'course': course,
+        'is_enrolled': is_enrolled,
         'available_modules': available_modules,
         'locked_modules': locked_modules,
     })
@@ -57,6 +62,13 @@ def load_components(request, course_id, module_id):
         'module_id': module_id,
         'quiz': quiz,
     })
+
+@user_passes_test(is_learner)
+def enrol_course(request, course_id):
+    learner = Learner.objects.get(user=request.user)
+    course = Course.objects.get(id=course_id)
+    Enrollment.enrol(learner, course)
+    return redirect('courses:view_enrolled_course')
 
 """
 Responsible for adding new courses
