@@ -14,6 +14,7 @@ urlpatterns = [
     path('new', views.new_course, name='new_course'),
     path('<int:course_id>/create_image_component/', views.upload_image, name='upload_image'),
     path('<int:course_id>/component_details', views.view_component, name='view_component'),
+    path('enrolled', views.view_enrolled_course, name='view_enrolled_course'),
 ]
 
 # new_module page

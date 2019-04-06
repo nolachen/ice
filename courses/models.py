@@ -15,12 +15,10 @@ class Instructor(models.Model):
         User,
         on_delete=models.CASCADE
     )
-    name = models.CharField(default='', max_length=200)
 
 class Course(models.Model):
     name = models.CharField(max_length=200)
-    #instructor = models.ForeignKey(Instructor, on_delete=models.CASCADE)
-    instructor_name = models.TextField(default='')
+    instructor = models.ForeignKey(Instructor, on_delete=models.CASCADE)
     category = models.TextField(default='')
     description = models.TextField(default='')
     deployed = models.BooleanField(default=False)
@@ -136,3 +134,13 @@ class TextComponent(Component):
 class ImageComponent(Component):
     image_details = models.CharField(max_length=200)
     image = models.ImageField(default=None, blank=True, null=True, upload_to='images/')
+
+class Enrollment(models.Model):
+    course = models.ForeignKey(Course, on_delete=models.CASCADE)
+    learner = models.ForeignKey(Learner, on_delete=models.CASCADE)
+    completed = models.BooleanField(default=False)
+    completed_date = models.DateField(null=True, blank=True)
+
+    def update_date(self, date):
+        self.completed_date = date 
+        self.save()
