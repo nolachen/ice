@@ -1,5 +1,5 @@
 from django.shortcuts import render, get_object_or_404
-from django.http import HttpRequest, HttpResponseRedirect, HttpResponse
+from django.http import HttpRequest, HttpResponseRedirect, HttpResponse, Http404
 from django.template import loader
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.urls import reverse
@@ -65,6 +65,8 @@ def new_course(request):
         if form.is_valid():
             new_course = form.save()
             return HttpResponseRedirect(new_course.get_absolute_url())
+        else:
+            raise Http404
     else:
         form = CourseForm()
     return render(request, 'courses/course_form.html', {
@@ -109,6 +111,8 @@ def edit_module(request, course_id, module_id=None):
             form.save()
             url = reverse("module_list", kwargs={'course_id': course_id})
             return HttpResponseRedirect(url)
+        else:
+            raise Http404
 
     # if module_id:
     #     module = Module.objects.get(id=module_id)
@@ -147,6 +151,8 @@ def take_quiz(request, course_id, module_id, quiz_id):
                 passed = False
             
             QuizResult.new_record(quiz.id, request.user.id, num_of_correct / quiz.num_questions * 100, passed)
+        else:
+            raise Http404
 
         return render(request, 'quiz/result.html', {
             "course_id": quiz.course_id,
