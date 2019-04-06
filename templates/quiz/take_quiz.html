@@ -1,7 +1,11 @@
 <form action="" method="POST">
+    {% if passed == True %}
+    <p>You have already passed the quiz.</p>
+    {% else %}
     <h1>Quiz</h1>
-    <h3>This is quiz {{ quiz.course_id }}</h2>
+    <h3>{{ quiz.title }}</h2>
     {% csrf_token %}
     {{ form }}
     <input type="submit" value="Submit">
+    {% endif %}
 </form>

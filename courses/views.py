@@ -5,7 +5,7 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 from django.urls import reverse
 
 from courses.forms import CourseForm, ModuleForm, QuizForm
-from courses.models import Instructor, Course, Module, Quiz, Answer, Learner, Enrollment
+from courses.models import Instructor, Course, Module, Quiz, Answer, QuizResult, Learner, Enrollment
 
 import logging
 logger = logging.getLogger(__name__)
@@ -32,7 +32,6 @@ def view_course(request, course_id):
         'modules': modules,
     })
 
-<<<<<<< HEAD
 def load_components(request, course_id, module_id):  
     module = Module.objects.get(id=module_id)
     components = module.getComponents().order_by("index")
@@ -49,16 +48,6 @@ def view_enrolled_course(request):
     return render(request, 'learner/enrolled_course_list.html', {
         'enrolled_course': enrolled_course,
     })
-=======
-def loadComponents(request, course_id, module_id):
-    courseObj = Course.objects.get(id=course_id)    
-    moduleObj = Module.objects.get(id=module_id)
-    component_list = moduleObj.getComponents().order_by("index")
-    context = {'components': component_list}
-    print (context)
-    template = loader.get_template('courses/component_list.html')
-    return HttpResponse(template.render(context,request))
->>>>>>> Calculate quiz result
 
 """
 Responsible for adding new courses
@@ -131,6 +120,13 @@ def edit_module(request, course_id, module_id=None):
 
 def take_quiz(request, quiz_id):
     quiz = Quiz.objects.get(id=quiz_id)
+    # Check if already passed
+    if (QuizResult.objects.filter(learner_id=request.user.id).exists()
+            and QuizResult.objects.filter(quiz_id=quiz.id).exists()):
+        return render(request, 'quiz/take_quiz.html', {
+            "passed": True,
+        })
+
     questions = quiz.question_set.all()
     if request.method == "POST":
         form = QuizForm(quiz_id, request.POST)
@@ -147,11 +143,22 @@ def take_quiz(request, quiz_id):
             if (num_of_correct >= quiz.num_questions * quiz.passing_score):
                 print('passed')
                 passed = True
+                print(request.user.id)
+                record_passed_quiz(request.user.id, quiz.id)
+
         return render(request, 'quiz/result.html', {
+            "course_id": quiz.course_id,
+            "quiz": quiz,
             "passed": passed,
         })
     else:
         form = QuizForm(quiz_id)
     return render(request, 'quiz/take_quiz.html', {
+        "quiz": quiz,
         "form": form,
     })
+
+def record_passed_quiz(learner_id, quiz_id):
+    print('this is the learner_id', learner_id)
+    new_result = QuizResult(passed=True, learner_id=learner_id, quiz_id=quiz_id)
+    new_result.save()
