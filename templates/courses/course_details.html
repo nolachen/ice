@@ -17,10 +17,22 @@
       
       <h4> Modules </h4>
       <div id="moduleContainer">
-        <ul class="nav nav-tabs" id="modules">
-          {% for module in modules %}
+        <ul class="nav nav-tabs" id="available_modules">
+          <h5> Available Modules </h5>
+          {% for module in available_modules %}
             <li role="presentation" id="{{ module.id }}">
               <a data-toggle="tab" href="{% url 'courses:load_components' course_id=course.id module_id=module.id %}">{{ module.title }}</a>
+            </li>
+          {% endfor %}
+        </ul>
+
+        <br>
+
+        <ul class="nav nav-tabs" id="locked_modules">
+          <h5> Locked Modules </h5>
+          {% for module in locked_modules %}
+            <li role="presentation" id="{{ module.id }}">
+              <p>{{ module.title }}</p>
             </li>
           {% endfor %}
         </ul>
