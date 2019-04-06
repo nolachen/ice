@@ -5,7 +5,7 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 from django.urls import reverse
 
 from courses.forms import CourseForm, ModuleForm, QuizForm
-from courses.models import Instructor, Course, Module, Quiz, Learner, Enrollment
+from courses.models import Instructor, Course, Module, Quiz, Answer, Learner, Enrollment
 
 import logging
 logger = logging.getLogger(__name__)
@@ -32,6 +32,7 @@ def view_course(request, course_id):
         'modules': modules,
     })
 
+<<<<<<< HEAD
 def load_components(request, course_id, module_id):  
     module = Module.objects.get(id=module_id)
     components = module.getComponents().order_by("index")
@@ -48,6 +49,16 @@ def view_enrolled_course(request):
     return render(request, 'learner/enrolled_course_list.html', {
         'enrolled_course': enrolled_course,
     })
+=======
+def loadComponents(request, course_id, module_id):
+    courseObj = Course.objects.get(id=course_id)    
+    moduleObj = Module.objects.get(id=module_id)
+    component_list = moduleObj.getComponents().order_by("index")
+    context = {'components': component_list}
+    print (context)
+    template = loader.get_template('courses/component_list.html')
+    return HttpResponse(template.render(context,request))
+>>>>>>> Calculate quiz result
 
 """
 Responsible for adding new courses
@@ -117,23 +128,30 @@ def edit_module(request, course_id, module_id=None):
         'action_word': 'Add',
         'form': form
     })
+
 def take_quiz(request, quiz_id):
     quiz = Quiz.objects.get(id=quiz_id)
-    questions=quiz.question_set.all()    
+    questions = quiz.question_set.all()
     if request.method == "POST":
-        """
-        To be Implemented
-        form = QuizForm(request.POST, questions)
-        if form.is_valid(): ## Will only ensure the option exists, not correctness.
-            responses = []
+        form = QuizForm(quiz_id, request.POST)
+        if form.is_valid():
+            passed = False
+            num_of_correct = 0
             for question in questions:
-                responses.append(form.cleaned_data[question])
-        """
+                print('choice:', form.cleaned_data[str(question.id)])
+                print('answer:', Answer.objects.get(question_id=question.id).correct_answer_id)
+                # form.cleaned_data[str(question.id)] is in <class 'str'>
+                if ( int(form.cleaned_data[str(question.id)]) == (Answer.objects.get(question_id=question.id).correct_answer_id)):
+                    print('correct')
+                    num_of_correct += 1
+            if (num_of_correct >= quiz.num_questions * quiz.passing_score):
+                print('passed')
+                passed = True
         return render(request, 'quiz/result.html', {
-            
+            "passed": passed,
         })
     else:
-        form = QuizForm(questions)
+        form = QuizForm(quiz_id)
     return render(request, 'quiz/take_quiz.html', {
         "form": form,
     })
