@@ -5,7 +5,7 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 from django.urls import reverse
 
 from courses.forms import CourseForm, ModuleForm, QuizForm
-from courses.models import Instructor, Course, Module, Quiz, Answer, QuizResult, Learner, Enrollment
+from courses.models import Instructor, Learner, Course, Module, Quiz, Answer, QuizResult, Enrollment
 
 import logging
 logger = logging.getLogger(__name__)
