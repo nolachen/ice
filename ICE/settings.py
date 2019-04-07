@@ -132,3 +132,7 @@ EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_HOST_USER = 'comp3297e@gmail.com'
 EMAIL_HOST_PASSWORD = 'icesystememail'
 EMAIL_PORT = 587
+
+# Paths for uploading and accessing images
+MEDIA_ROOT =  os.path.join(BASE_DIR, 'media') 
+MEDIA_URL = '/media/'

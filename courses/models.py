@@ -1,6 +1,7 @@
 from django.contrib.auth.models import User
 from django.urls import reverse
 from django.db import models
+from django import forms
 from django.core.validators import MaxValueValidator, MinValueValidator
 
 class Learner(models.Model):
@@ -108,8 +109,8 @@ class QuizResult(models.Model):
     passed = models.BooleanField(default=False)
     timestamp = models.DateTimeField(auto_now_add=True)
 
-    def new_record(quiz_id, learner_id, result, passed):
-        new_result = QuizResult(quiz_id=quiz_id, learner_id=learner_id, result=result, passed=passed)
+    def new_record(quiz_id, learner, result, passed):
+        new_result = QuizResult(quiz_id=quiz_id, learner=learner, result=result, passed=passed)
         new_result.save()
 
 # Component Model
@@ -130,11 +131,18 @@ class Component(models.Model):
     def __str__(self):
         return self.title
 
+    def save(self, *args, **kwargs):
+        if not self.index:
+            # Default the index to the last one in the sequence
+            self.index = self.course.components.count() - 1
+        super(Component, self).save(*args, **kwargs)
+
 class TextComponent(Component):
     text_passage = models.TextField()
 
 class ImageComponent(Component):
     image_details = models.CharField(max_length=200)
+    image = models.ImageField(default=None, blank=True, null=True, upload_to='images/')
 
 class Enrollment(models.Model):
     course = models.ForeignKey(Course, on_delete=models.CASCADE)
