@@ -7,7 +7,7 @@
 {% block content %}
 {% if user.is_authenticated %}
   {% if user|is_instructor %}
-    <a href="{% url 'courses:new_course' %}">Create Course</a>
+    <a href="{% url 'courses:add_course' %}">Create Course</a>
   {% endif %}
   Hi {{ user.username }}!
   <p>Available Courses</p>
