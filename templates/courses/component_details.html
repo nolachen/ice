@@ -1,0 +1,6 @@
+<h1>Component Details</h1>
+<p>This component belongs in the following course: {{ course.name }}</p>
+{% if form.image %}
+    <p>Image Details: {{ form.image_details }}</p>
+    <img src="{{ form.image.url }}">
+{% endif %}

@@ -4,7 +4,7 @@ from django.template import loader
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.urls import reverse
 
-from courses.forms import CourseForm, ModuleForm, QuizForm
+from courses.forms import CourseForm, ModuleForm, QuizForm, ImageUploadForm
 from courses.models import *
 
 import logging
@@ -16,10 +16,13 @@ from django.contrib.auth.models import User
 from django.contrib.auth import logout, authenticate, login
 from django.contrib.auth.forms import AuthenticationForm
 
+from django.urls import reverse_lazy
+
 
 # USER IDENTITY HELPERS
 def is_instructor(user):
     return Instructor.objects.filter(instructor_id=user.id).exists()
+
 
 def is_learner(user):
     return Learner.objects.filter(learner_id=user.id).exists()
@@ -183,4 +186,43 @@ def take_quiz(request, course_id, module_id, quiz_id):
     return render(request, 'quiz/take.html', {
         "quiz": quiz,
         "form": form,
+    })
+
+def view_component(request, course_id):
+    course = Course.objects.get(id=course_id)
+    template = 'courses/component_details.html'
+
+    return render(request, template, {
+        'course': course
+    })
+
+@user_passes_test(is_instructor)
+def upload_image(request, course_id):
+    course = Course.objects.get(id=course_id)
+
+    if request.method == 'POST':
+        form = ImageUploadForm(request.POST, request.FILES, course_id=course_id)
+        if form.is_valid():
+            form = form.save(commit=False)
+            form.course = course
+            form.save()
+            return render(request, 'courses/component_details.html', {
+                'course_id': course_id,
+                'course': course,
+                'form': form,
+            })
+        else:
+            raise Http404
+
+        return render(request, 'courses/component_details.html', {
+            'course_id': course_id,
+            'course': course,
+        })
+    else:
+        form = ImageUploadForm(request.POST, request.FILES, course_id=course_id)
+    
+    return render(request, 'courses/create_image_component.html', { 
+        'form': form,
+        'course_id': course_id, 
+        'course': course,
     })
