@@ -1,0 +1,5 @@
+{% autoescape off %}
+Hi,
+You are invited to become one of the instructors on our platform, please click the link below to register your instructor account,
+http://{{ domain }}{% url 'accounts:activate' uidb64=uid token=token %}
+{% endautoescape %}

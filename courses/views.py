@@ -69,11 +69,13 @@ Responsible for adding new courses
 Utilized CourseForm which is in the file forms.py
 """
 @user_passes_test(is_instructor)
-def new_course(request):
+def add_course(request):
     if request.POST:
         form = CourseForm(request.POST)
         if form.is_valid():
-            new_course = form.save()
+            new_course = form.save(commit=False)
+            new_course.instructor_id = Instructor.objects.get(instructor_id=request.user.id).id
+            new_course.save()
             return HttpResponseRedirect(new_course.get_absolute_url())
         else:
             raise Http404
