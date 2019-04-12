@@ -3,10 +3,10 @@ from django.urls import reverse_lazy
 from django.views import generic
 
 from django.http import HttpResponse, Http404
-from django.shortcuts import render, redirect
+from django.shortcuts import render, render_to_response, redirect
 from django.contrib.auth import login, authenticate
 from django.contrib.auth.decorators import login_required, user_passes_test
-from .forms import SignupForm, InviteForm, LearnerRegisterForm, InstructorRegisterForm
+from .forms import SignupForm, InviteForm, LearnerRegisterForm, InstructorRegisterForm, RestrictUserForm, UnrestrictUserForm
 from django.contrib.sites.shortcuts import get_current_site
 from django.utils.encoding import force_bytes, force_text
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
@@ -147,3 +147,29 @@ def register_instructor(request, user):
     return render(request, 'registration/register.html', {
         'form': form
     })
+
+@login_required
+@user_passes_test(is_superuser)
+def restrict_access(request):
+    if request.method == 'POST':
+        restrict_user_form = RestrictUserForm(request.POST)
+        unrestrict_user_form = UnrestrictUserForm(request.POST)
+        if restrict_user_form.is_valid():
+            user = User.objects.get(username=restrict_user_form.cleaned_data['username'])
+            user.is_active = False
+            user.save()
+            return HttpResponse('User account deactivated!')
+        if unrestrict_user_form.is_valid():
+            user = User.objects.get(username=unrestrict_user_form.cleaned_data['username'])
+            user.is_active = True
+            user.save()
+            return HttpResponse('User account activated!')
+        else:
+            raise Http404
+    else:
+        restrict_user_form = RestrictUserForm()
+        unrestrict_user_form = UnrestrictUserForm()
+    return render(request, 'admin/restrict_user.html', {
+        'restrict_user_form': restrict_user_form,
+        'unrestrict_user_form': unrestrict_user_form,
+    }) 
