@@ -115,7 +115,7 @@ class QuizResult(models.Model):
     passed = models.BooleanField(default=False)
     timestamp = models.DateTimeField(auto_now_add=True)
 
-    def new_record(self, quiz_id, learner, result, passed):
+    def new_record(quiz_id, learner, result, passed):
         new_result = QuizResult(quiz_id=quiz_id, learner=learner, result=result, passed=passed)
         new_result.save()
 
@@ -156,10 +156,6 @@ class Enrollment(models.Model):
     completed = models.BooleanField(default=False)
     completed_date = models.DateField(null=True, blank=True)
 
-    def enrol(learner, course):
+    def enroll(learner, course):
         new_enrollment = Enrollment(learner=learner, course=course)
         new_enrollment.save()
-
-    def update_date(self, date):
-        self.completed_date = date 
-        self.save()

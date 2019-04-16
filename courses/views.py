@@ -32,6 +32,7 @@ def is_learner(user):
 def view_course(request, course_id):
     is_enrolled = False
     course = Course.objects.get(id=course_id)
+    instructor = User.objects.get(id=course.instructor.instructor_id)
     modules = course.modules.order_by('index').all()
     available_modules = []
     locked_modules = []
@@ -51,9 +52,13 @@ def view_course(request, course_id):
         enrollments = Enrollment.objects.filter(learner=learner)
         if enrollments.filter(course=course).exists():
             is_enrolled = True
-
+        else:
+            available_modules = []
+            locked_modules = modules
+    
     return render(request, 'courses/course_details.html', {
         'course': course,
+        'instructor': instructor,
         'is_learner': is_learner(request.user),
         'is_enrolled': is_enrolled,
         'available_modules': available_modules,
@@ -61,10 +66,10 @@ def view_course(request, course_id):
     })
 
 @user_passes_test(is_learner)
-def enrol_course(request, course_id):
+def enroll_course(request, course_id):
     learner = Learner.objects.get(learner_id=request.user.id)
     course = Course.objects.get(id=course_id)
-    Enrollment.enrol(learner, course)
+    Enrollment.enroll(learner, course)
     return redirect('courses:view_enrolled_course')
 
 def load_components(request, course_id, module_id):  
