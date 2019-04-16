@@ -4,7 +4,7 @@ from django.template import loader
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.urls import reverse
 
-from courses.forms import CourseForm, ModuleForm, QuizForm, ImageUploadForm, TextComponentForm
+from courses.forms import CourseForm, ModuleForm, QuizForm, ImageUploadForm, TextComponentForm, SelectCategoryForm
 from courses.models import *
 
 import logging
@@ -164,9 +164,22 @@ def add_course(request):
     })
 
 def home(request):
+    if request.POST:
+        form = SelectCategoryForm(request.POST)
+        if form.is_valid():
+            if form.cleaned_data['category'] == 'all':
+                courses = Course.objects.all()
+            else:
+                courses = Course.objects.filter(category=form.cleaned_data['category'])
+            return render(request, 'home.html', {
+                'courses': courses,
+                'form': form,
+            })
     courses = Course.objects.all()
+    form = SelectCategoryForm()
     return render(request, 'home.html', {
         'courses': courses,
+        'form': form,
     })
 
 # @login_required

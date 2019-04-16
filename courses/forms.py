@@ -1,5 +1,5 @@
 from django import forms
-from courses.models import Course, Module, Component, Question, Answer, Choice, Quiz, ImageComponent, TextComponent
+from courses.models import Course, Module, Component, Category, Question, Answer, Choice, Quiz, ImageComponent, TextComponent
 import logging
 logger = logging.getLogger(__name__)
 
@@ -78,3 +78,12 @@ class TextComponentForm(ComponentForm):
     class Meta(ComponentForm.Meta):
         model = TextComponent
         fields = ['text_passage']
+
+class SelectCategoryForm(forms.Form):
+    def __init__(self, *args, **kwargs):
+        categories = Category.objects.all()
+        choices = [('all', ('All'))]
+        super(SelectCategoryForm, self).__init__(*args, **kwargs)
+        for category in categories:
+            choices.append((category.id, category.name))
+        self.fields['category'] = forms.ChoiceField(choices=choices)

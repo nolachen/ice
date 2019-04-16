@@ -11,6 +11,11 @@
   {% endif %}
   Hi {{ user.username }}!
   <p>Available Courses</p>
+    <form action="" method="POST">
+        {% csrf_token %}
+        {{ form }}
+        <input type="submit" value="Submit">
+    </form>
     <ol>
     {% for course in courses %}
     <li><a href="{% url 'courses:view_course' course.id %}">{{ course.name }}</a></li>
