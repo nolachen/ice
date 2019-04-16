@@ -82,8 +82,8 @@ class TextComponentForm(ComponentForm):
 class SelectCategoryForm(forms.Form):
     def __init__(self, *args, **kwargs):
         categories = Category.objects.all()
-        choices = []
-        super(QuizForm, self).__init__(*args, **kwargs)
+        choices = [('all', ('All'))]
+        super(SelectCategoryForm, self).__init__(*args, **kwargs)
         for category in categories:
             choices.append((category.id, category.name))
         self.fields['category'] = forms.ChoiceField(choices=choices)

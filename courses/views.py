@@ -149,8 +149,10 @@ def home(request):
     if request.POST:
         form = SelectCategoryForm(request.POST)
         if form.is_valid():
-            courses = Course.objects.filter(category=form.cleaned_data['category'])
-            #form = SelectCategoryForm()
+            if form.cleaned_data['category'] == 'all':
+                courses = Course.objects.all()
+            else:
+                courses = Course.objects.filter(category=form.cleaned_data['category'])
             return render(request, 'home.html', {
                 'courses': courses,
                 'form': form,
