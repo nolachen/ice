@@ -3,19 +3,20 @@
 {% block title %}Course Details{% endblock %}
 
 {% block content %}
+<h1>Course Information</h1>
 <div class="container" style="padding-top:10px">
-  <h1>Course Information</h1>
   <div>
-    <div class="col-md-6">
+      <div class="col-md-6">
 
-      {% if course %}
-      <p> Name: {{ course.name }}</p>
-      <p> Category: {{ course.category }}</p>
-      <p> Instructor: {{ course.instructor_name }}</p>
-      <p> CECU Value: {{ course.cecu_value }} units</p>
-      <p> Description: {{ course.description }}</p>
+        {% if course %}
+        <p> Name: {{ course.name }}</p>
+        <p> Category: {{ course.category }}</p>
+        <p> Instructor: {{ course.instructor_name }}</p>
+        <p> CECU Value: {{ course.cecu_value }} units</p>
+        <p> Description: {{ course.description }}</p>
+      </div>
     </div>
-      <div class="row course-details-buttons">
+      <div class="column course-details-buttons">
         <div id="moduleContainer">
           <h4> Modules </h4>
           <!-- <ul class="nav nav-tabs" id="available_modules"> -->

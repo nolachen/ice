@@ -45,6 +45,10 @@
 /* Registration/Log In */
 
 /* Courses */
+.container {
+    display: flex;
+    flex-direction: row;
+}
 .course-details-buttons > div {
     margin: 5px;
 }
