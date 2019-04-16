@@ -32,16 +32,20 @@ def view_course(request, course_id):
     modules = course.modules.order_by('index').all()
     available_modules = []
     locked_modules = []
-    for module in modules:
-        quiz = Quiz.objects.get(module=module)
-        quiz_result = QuizResult.objects.filter(learner__learner=request.user, quiz_id=quiz.id)
-        if is_instructor(request.user) or quiz_result.filter(passed=True).exists():
-            available_modules.append(module)
-        else:
-            available_modules.append(module)
-            module_index = list(modules).index(module) + 1
-            locked_modules = modules[module_index:]
-            break
+    if is_instructor(request.user):
+        available_modules = modules
+    else:
+        for module in modules:
+            if Quiz.objects.filter(module=module).exists():
+                quiz = Quiz.objects.get(module=module)
+                quiz_result = QuizResult.objects.filter(learner__learner=request.user, quiz_id=quiz.id)
+                if quiz_result.filter(passed=True).exists():
+                    available_modules.append(module)
+                else:
+                    available_modules.append(module)
+                    module_index = list(modules).index(module) + 1
+                    locked_modules = modules[module_index:]
+                    break
     print(available_modules)
     print(locked_modules)
     return render(request, 'courses/course_details.html', {
@@ -76,50 +80,58 @@ def all_components(request, course_id):
 @user_passes_test(is_instructor)
 def edit_component(request, course_id, component_id):
     component = Component.objects.get(id=component_id)
+    course = Course.objects.get(id=course_id)
     # Submitting edited component
     if request.method == 'POST':
         pass
     # Dispay the edit page
     else:
         return render(request, 'courses/component_edit.html', {
-            'component': component
+            'component': component,
+            'course': course
         })
 
 @user_passes_test(is_instructor)
 def new_component(request, course_id, type):
+    type_to_component_type = { 'image': Component.IMAGE, 'text': Component.TEXT }
     course = Course.objects.get(id=course_id)
 
     if request.method == 'POST':
         if type == 'image':
             form = ImageUploadForm(request.POST, request.FILES, course_id=course_id)
         elif type == 'text':
-            form = TextComponent(request.POST, course_id=course_id)
+            form = TextComponentForm(request.POST, course_id=course_id)
         else:
             raise Http404
 
         if form.is_valid():
             form = form.save(commit=False)
             form.course = course
+            form.component_type = type_to_component_type[type]
             form.save()
-            return render(request, 'courses/component_details.html', {
-                'course_id': course_id,
-                'course': course,
-                'form': form,
-            })
+            component_url = reverse("courses:all_components", kwargs={'course_id': course_id})
+            return HttpResponseRedirect(component_url)
         else:
-            raise Http404
+            print(form.errors)
+            print(form.non_field_errors)
+            # Re-render the form, so the errors will show
+            return render(request, 'courses/component_edit.html', { 
+                'form': form,
+                'course': course,
+            }) 
 
     else:
         if type == 'image':
             form = ImageUploadForm(course_id=course_id)
+            template = 'courses/component_edit.html'
         elif type == 'text':
-            form = TextComponent(course_id=course_id)
+            form = TextComponentForm(course_id=course_id)
+            template = 'courses/component_edit.html'
         else:
             raise Http404
         
-        return render(request, 'courses/create_image_component.html', { 
-        'form': form,
-            'course_id': course_id, 
+        return render(request, template, { 
+            'form': form,
             'course': course,
         }) 
 
@@ -190,7 +202,7 @@ def edit_module(request, course_id, module_id=None):
             form = form.save(commit=False)
             form.course = course
             form.save()
-            url = reverse("module_list", kwargs={'course_id': course_id})
+            url = reverse("courses:module_list", kwargs={'course_id': course_id})
             return HttpResponseRedirect(url)
         else:
             raise Http404

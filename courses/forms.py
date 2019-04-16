@@ -3,6 +3,16 @@ from courses.models import Course, Module, Component, Question, Answer, Choice, 
 import logging
 logger = logging.getLogger(__name__)
 
+# Base form to add Bootstrap 'form-control' class to every input
+class BaseForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super(BaseForm, self).__init__(*args, **kwargs)
+        for _, field in self.fields.items():
+            if getattr(field.widget, 'input_type', None) == 'file':
+                field.widget.attrs['class'] = 'form-control-file'
+            else:     
+                field.widget.attrs['class'] = 'form-control'
+
 """
 For adding new courses
 """
@@ -51,7 +61,7 @@ class QuizForm(forms.Form):
             self.fields[str(question.id)] = forms.ChoiceField(label=question.question_text, required=True, 
                                         choices=choices, widget=forms.RadioSelect)
 
-class ComponentForm(forms.ModelForm):
+class ComponentForm(BaseForm):
     def __init__(self, *args, **kwargs):
         course_id = kwargs.pop('course_id')
         if not course_id:
@@ -61,15 +71,21 @@ class ComponentForm(forms.ModelForm):
 
     class Meta:
         model = Component
-        fields = ('module', 'course', 'title')
+        fields = ('module', 'title')
+        help_texts = {
+            'module': 'Optional'
+        }
 
 class ImageUploadForm(ComponentForm):
     def __init__(self, *args, **kwargs):
         super(ImageUploadForm, self).__init__(*args, **kwargs)
 
-    class Meta:
+    class Meta(ComponentForm.Meta):
         model = ImageComponent
-        fields = ('image_details', 'image')
+        fields = ComponentForm.Meta.fields + ('image_details', 'image')
+        labels = {
+            'image_details': 'Description'
+        }
 
 class TextComponentForm(ComponentForm):
     def __init__(self, *args, **kwargs):
@@ -77,4 +93,4 @@ class TextComponentForm(ComponentForm):
 
     class Meta(ComponentForm.Meta):
         model = TextComponent
-        fields = ['text_passage']
+        fields = ComponentForm.Meta.fields + ('text_passage',)
