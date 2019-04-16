@@ -1,5 +1,12 @@
+{% extends 'base.html' %}
+
+{% block title %}Signup{% endblock %}
 {% block content %}
+
+
+<div id="sign_up_page">
   <h2>Sign up</h2>
+  <hr class='divider'>
   <form method="post">
     {% csrf_token %}
       {% for field in form %}
@@ -14,6 +21,10 @@
         {% endfor %}
       </p>
       {% endfor %}
-    <button type="submit">Sign up</button>
+    <button id="signup_page_button" type="submit">Sign up</button>
   </form>
+</div>
+
+
+
 {% endblock %}
