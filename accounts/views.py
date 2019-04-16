@@ -3,10 +3,10 @@ from django.urls import reverse_lazy
 from django.views import generic
 
 from django.http import HttpResponse, Http404
-from django.shortcuts import render, redirect
+from django.shortcuts import render, render_to_response, redirect
 from django.contrib.auth import login, authenticate
 from django.contrib.auth.decorators import login_required, user_passes_test
-from .forms import SignupForm, InviteForm, LearnerRegisterForm, InstructorRegisterForm
+from .forms import SignupForm, InviteForm, LearnerRegisterForm, InstructorRegisterForm, RestrictUserForm, UnrestrictUserForm
 from django.contrib.sites.shortcuts import get_current_site
 from django.utils.encoding import force_bytes, force_text
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
@@ -14,8 +14,11 @@ from django.template.loader import render_to_string
 from .tokens import account_activation_token
 from django.contrib.auth.models import User
 from django.core.mail import EmailMessage
+from django.db import IntegrityError
 
 from courses.models import Learner, Instructor
+
+import requests
 
 # USER IDENTITY HELPERS
 def is_superuser(user):
@@ -28,19 +31,43 @@ def signup(request):
     if request.method == 'POST':
         form = SignupForm(request.POST)
         if form.is_valid():
+            response = requests.get('https://gibice-hrserver.herokuapp.com/info/' + str(form.cleaned_data.get('staff_id')))
+            try:
+                json_data = response.json()
+            except ValueError:
+                return HttpResponse('Invalid staff ID!')
+            print(json_data)
+            print(json_data['first_name'])
+
             user = form.save(commit=False)
             user.is_active = False
             user.is_staff = True
             user.save()
+            user.email = json_data['email']
+            user.first_name = json_data['first_name']
+            user.last_name = json_data['last_name']
+            # Here I have to set something for the username, otherwise it will be blank
+            # when another user sign up for the site, there will be another blank username,
+            # hence the UNIQUE constraint will be failed
+            user.username = json_data['email']
+            try:
+                user.save()
+            except IntegrityError as e:
+                return HttpResponse('You have already signed up for the ICE System, please check your mail box for the activation email!')
+
+            learner = Learner(learner_id=user.id)
+            learner.staff_id = json_data['id']
+            learner.save()
+
             current_site = get_current_site(request)
             mail_subject = 'Activate your account.'
             message = render_to_string('registration/acc_active_email.html', {
                 'user': user,
                 'domain': current_site.domain,
-                'uid': urlsafe_base64_encode(force_bytes(user.pk)),
+                'uid': urlsafe_base64_encode(force_bytes(user.pk)).decode(),
                 'token': account_activation_token.make_token(user),
             })
-            to_email = form.cleaned_data.get('email')
+            to_email = json_data['email']
             email = EmailMessage(
                         mail_subject, message, to=[to_email]
             )
@@ -65,6 +92,7 @@ def invite(request):
         if form.is_valid():
             user = form.save(commit=False)
             user.is_active = False
+            #TODO: Using is_staff here may not be correct
             user.is_staff = False
             user.save()
             current_site = get_current_site(request)
@@ -72,7 +100,7 @@ def invite(request):
             message = render_to_string('registration/invite_email.html', {
                 'user': user,
                 'domain': current_site.domain,
-                'uid': urlsafe_base64_encode(force_bytes(user.pk)),
+                'uid': urlsafe_base64_encode(force_bytes(user.pk)).decode(),
                 'token': account_activation_token.make_token(user),
             })
             to_email = form.cleaned_data.get('email')
@@ -115,8 +143,6 @@ def register_learner(request, user):
             user.set_password(form.cleaned_data['password2'])
             user.is_active = True
             user.save()
-            learner = Learner(learner_id=user.id)
-            learner.save()
         else:
             raise Http404
         return redirect('login')
@@ -147,3 +173,29 @@ def register_instructor(request, user):
     return render(request, 'registration/register.html', {
         'form': form
     })
+
+@login_required
+@user_passes_test(is_superuser)
+def restrict_access(request):
+    if request.method == 'POST':
+        restrict_user_form = RestrictUserForm(request.POST)
+        unrestrict_user_form = UnrestrictUserForm(request.POST)
+        if restrict_user_form.is_valid():
+            user = User.objects.get(username=restrict_user_form.cleaned_data['username'])
+            user.is_active = False
+            user.save()
+            return HttpResponse('User account deactivated!')
+        if unrestrict_user_form.is_valid():
+            user = User.objects.get(username=unrestrict_user_form.cleaned_data['username'])
+            user.is_active = True
+            user.save()
+            return HttpResponse('User account activated!')
+        else:
+            raise Http404
+    else:
+        restrict_user_form = RestrictUserForm()
+        unrestrict_user_form = UnrestrictUserForm()
+    return render(request, 'admin/restrict_user.html', {
+        'restrict_user_form': restrict_user_form,
+        'unrestrict_user_form': unrestrict_user_form,
+    }) 

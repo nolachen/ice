@@ -29,6 +29,7 @@ urlpatterns = [
     path('accounts/signup/', signup, name='signup'),
     path('admin/', admin.site.urls),
     path('admin/invite', invite, name='invite'),
+    path('admin/restrict', restrict_access, name='restrict_access'),
     path('courses/', include('courses.urls')),
 ]
 

@@ -3,13 +3,10 @@ from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 
 class SignupForm(forms.ModelForm):
-    email = forms.EmailField(max_length=200)
-    #autobiography = forms.CharField(max_length=200)
-    staff_id = forms.CharField(max_length=20)
+    staff_id = forms.CharField(min_length=8, max_length=8)
     class Meta:
         model = User
-        #fields = ('username', 'first_name', 'last_name', 'email', 'password1', 'password2', 'autobiography')
-        fields = ('staff_id', 'email')
+        fields = ('staff_id',)
 
 class InviteForm(forms.ModelForm):
     email = forms.EmailField(max_length=200)
@@ -27,3 +24,9 @@ class InstructorRegisterForm(UserCreationForm):
     class Meta:
         model = User
         fields = ('username', 'first_name', 'last_name', 'password1', 'password2', 'autobiography')
+
+class RestrictUserForm(forms.Form):
+    username = forms.ModelChoiceField(queryset=User.objects.filter(is_active=True, is_superuser=False).order_by('username'))
+
+class UnrestrictUserForm(forms.Form):
+    username = forms.ModelChoiceField(queryset=User.objects.filter(is_active=False, is_superuser=False).order_by('username')) 

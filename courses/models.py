@@ -2,14 +2,15 @@ from django.contrib.auth.models import User
 from django.urls import reverse
 from django.db import models
 from django import forms
-from django.core.validators import MaxValueValidator, MinValueValidator
 from django.utils.html import format_html
+from django.core.validators import MaxValueValidator, MinValueValidator, MinLengthValidator
 
 class Learner(models.Model):
     learner = models.OneToOneField(
         User,
         on_delete=models.CASCADE
     )
+    staff_id = models.CharField(max_length=8, validators=[MinLengthValidator(8)], unique=True)
 
 class Instructor(models.Model):
     instructor = models.OneToOneField(
@@ -115,7 +116,7 @@ class QuizResult(models.Model):
     passed = models.BooleanField(default=False)
     timestamp = models.DateTimeField(auto_now_add=True)
 
-    def new_record(self, quiz_id, learner, result, passed):
+    def new_record(quiz_id, learner, result, passed):
         new_result = QuizResult(quiz_id=quiz_id, learner=learner, result=result, passed=passed)
         new_result.save()
 
@@ -184,6 +185,6 @@ class Enrollment(models.Model):
     completed = models.BooleanField(default=False)
     completed_date = models.DateField(null=True, blank=True)
 
-    def update_date(self, date):
-        self.completed_date = date 
-        self.save()
+    def enroll(learner, course):
+        new_enrollment = Enrollment(learner=learner, course=course)
+        new_enrollment.save()

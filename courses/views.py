@@ -4,7 +4,7 @@ from django.template import loader
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.urls import reverse
 
-from courses.forms import CourseForm, ModuleForm, QuizForm, ImageUploadForm, TextComponentForm
+from courses.forms import CourseForm, ModuleForm, QuizForm, ImageUploadForm, TextComponentForm, SelectCategoryForm
 from courses.models import *
 
 import logging
@@ -18,6 +18,8 @@ from django.contrib.auth.forms import AuthenticationForm
 
 from django.urls import reverse_lazy
 
+from datetime import date
+
 
 # USER IDENTITY HELPERS
 def is_instructor(user):
@@ -28,10 +30,13 @@ def is_learner(user):
 
 @login_required
 def view_course(request, course_id):
+    is_enrolled = False
     course = Course.objects.get(id=course_id)
+    instructor = User.objects.get(id=course.instructor.instructor_id)
     modules = course.modules.order_by('index').all()
     available_modules = []
     locked_modules = []
+
     if is_instructor(request.user):
         available_modules = modules
     else:
@@ -46,19 +51,38 @@ def view_course(request, course_id):
                     module_index = list(modules).index(module) + 1
                     locked_modules = modules[module_index:]
                     break
-    print(available_modules)
-    print(locked_modules)
+
+    if is_learner(request.user):
+        learner = Learner.objects.get(learner_id=request.user.id)
+        enrollments = Enrollment.objects.filter(learner=learner)
+        if enrollments.filter(course=course).exists():
+            is_enrolled = True
+        else:
+            available_modules = []
+            locked_modules = modules
+    
     return render(request, 'courses/course_details.html', {
         'course': course,
+        'instructor': instructor,
+        'is_learner': is_learner(request.user),
+        'is_enrolled': is_enrolled,
         'available_modules': available_modules,
         'locked_modules': locked_modules,
     })
+
+@user_passes_test(is_learner)
+def enroll_course(request, course_id):
+    learner = Learner.objects.get(learner_id=request.user.id)
+    course = Course.objects.get(id=course_id)
+    Enrollment.enroll(learner, course)
+    return redirect('courses:view_enrolled_course')
 
 def load_components(request, course_id, module_id):  
     module = Module.objects.get(id=module_id)
     components = module.getComponents().order_by("index")
     quiz = Quiz.objects.get(module_id=module_id)
     return render(request, 'courses/component_list.html', {
+        'is_learner': is_learner(request.user),
         'components': components,
         'course_id': course_id,
         'module_id': module_id,
@@ -158,9 +182,22 @@ def add_course(request):
     })
 
 def home(request):
+    if request.POST:
+        form = SelectCategoryForm(request.POST)
+        if form.is_valid():
+            if form.cleaned_data['category'] == 'all':
+                courses = Course.objects.all()
+            else:
+                courses = Course.objects.filter(category=form.cleaned_data['category'])
+            return render(request, 'home.html', {
+                'courses': courses,
+                'form': form,
+            })
     courses = Course.objects.all()
+    form = SelectCategoryForm()
     return render(request, 'home.html', {
         'courses': courses,
+        'form': form,
     })
 
 # @login_required
@@ -180,12 +217,14 @@ def module_list(request, course_id):
 @user_passes_test(is_learner)
 def view_enrolled_course(request):
     learner = Learner.objects.get(learner=request.user)
-    enrolled_course = []
-    enrollments = Enrollment.objects.filter(learner=learner)
-    for enrollment in enrollments:
-        enrolled_course.append(Course.objects.get(enrollment=enrollment))
+    not_completed_course = []
+    completed_enrollments = Enrollment.objects.filter(learner=learner, completed=True)
+    not_completed_enrollments = Enrollment.objects.filter(learner=learner, completed=False)
+    for enrollment in not_completed_enrollments:
+        not_completed_course.append(Course.objects.get(enrollment=enrollment))
     return render(request, 'courses/enrolled_course_list.html', {
-        'enrolled_course': enrolled_course,
+        'completed_enrollments': completed_enrollments,
+        'not_completed_course': not_completed_course,
     })
 
 @user_passes_test(is_instructor)
@@ -241,6 +280,14 @@ def take_quiz(request, course_id, module_id, quiz_id):
                     num_of_correct += 1
             if (num_of_correct >= quiz.passing_score * quiz.num_questions / 100):
                 passed = True
+                # Check if the module is the last module
+                module = Module.objects.get(id=module_id)
+                course = Course.objects.get(id=course_id)
+                if (module == course.modules.order_by('index').last()):
+                    enrollment = Enrollment.objects.get(learner=learner, course=course)
+                    enrollment.completed = True
+                    enrollment.completed_date = date.today()
+                    enrollment.save()
             else:
                 passed = False
             
