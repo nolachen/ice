@@ -1,0 +1,14 @@
+{% block content %}
+  <h2>Restrict users's access</h2>
+  <form method="post">
+    {% csrf_token %}
+    {{ restrict_user_form }}
+    <button type="submit">Submit</button>
+  </form>
+  <h2>Unrestrict user's access</h2>
+  <form method="post">
+    {% csrf_token %}
+    {{ unrestrict_user_form }}
+    <button type="submit">Submit</button>
+  </form>
+{% endblock %} 
