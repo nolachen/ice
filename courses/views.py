@@ -31,27 +31,31 @@ def is_learner(user):
 
 @login_required
 def view_course(request, course_id):
-    learner = Learner.objects.get(learner_id=request.user.id)
-    course = Course.objects.get(id=course_id)
     is_enrolled = False
-    enrollments = Enrollment.objects.filter(learner=learner)
-    if enrollments.filter(course=course).exists():
-        is_enrolled = True
+    course = Course.objects.get(id=course_id)
     modules = course.modules.order_by('index').all()
     available_modules = []
     locked_modules = []
     for module in modules:
         quiz = Quiz.objects.get(module=module)
-        quiz_result = QuizResult.objects.filter(learner=learner, quiz_id=quiz.id)
-        if quiz_result.filter(passed=True).exists():
+        quiz_result = QuizResult.objects.filter(learner__learner=request.user, quiz_id=quiz.id)
+        if is_instructor(request.user) or quiz_result.filter(passed=True).exists():
             available_modules.append(module)
         else:
             available_modules.append(module)
             module_index = list(modules).index(module) + 1
             locked_modules = modules[module_index:]
             break
+    
+    if is_learner(request.user):
+        learner = Learner.objects.get(learner_id=request.user.id)
+        enrollments = Enrollment.objects.filter(learner=learner)
+        if enrollments.filter(course=course).exists():
+            is_enrolled = True
+
     return render(request, 'courses/course_details.html', {
         'course': course,
+        'is_learner': is_learner(request.user),
         'is_enrolled': is_enrolled,
         'available_modules': available_modules,
         'locked_modules': locked_modules,
@@ -69,6 +73,7 @@ def load_components(request, course_id, module_id):
     components = module.getComponents().order_by("index")
     quiz = Quiz.objects.get(module_id=module_id)
     return render(request, 'courses/component_list.html', {
+        'is_learner': is_learner(request.user),
         'components': components,
         'course_id': course_id,
         'module_id': module_id,
