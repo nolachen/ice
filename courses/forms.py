@@ -1,5 +1,5 @@
 from django import forms
-from courses.models import Course, Module, Component, Question, Answer, Choice, Quiz, ImageComponent
+from courses.models import Course, Module, Component, Question, Answer, Choice, Quiz, ImageComponent, TextComponent
 import logging
 logger = logging.getLogger(__name__)
 
@@ -23,14 +23,14 @@ class ModuleForm(forms.ModelForm):
 
         super(ModuleForm, self).__init__(*args, **kwargs)
         course = Course.objects.get(id=course_id)
-        self.fields['textcomponents'] = forms.ModelMultipleChoiceField(
-            required=False,
-            queryset=course.textcomponents.filter(module__isnull=True)
-        )
-        self.fields['imagecomponents'] = forms.ModelMultipleChoiceField(
-            required=False,
-            queryset=course.imagecomponents.filter(module__isnull=True)
-        )
+        # self.fields['textcomponents'] = forms.ModelMultipleChoiceField(
+        #     required=False,
+        #     queryset=course.textcomponents.filter(module__isnull=True)
+        # )
+        # self.fields['imagecomponents'] = forms.ModelMultipleChoiceField(
+        #     required=False,
+        #     queryset=course.imagecomponents.filter(module__isnull=True)
+        # )
         self.fields['quiz'] = forms.ModelChoiceField(
             required=False,
             queryset=course.quizzes.filter(module__isnull=True)
@@ -51,14 +51,30 @@ class QuizForm(forms.Form):
             self.fields[str(question.id)] = forms.ChoiceField(label=question.question_text, required=True, 
                                         choices=choices, widget=forms.RadioSelect)
 
-class ImageUploadForm(forms.ModelForm):
-    class Meta:
-        model = ImageComponent
-        fields = ('image_details', 'image')
-    
+class ComponentForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         course_id = kwargs.pop('course_id')
         if not course_id:
-            raise RuntimeError('Need course_id for ImageUploadForm')
+            raise RuntimeError('Need course_id for ComponentForm')
 
+        super(ComponentForm, self).__init__(*args, **kwargs)
+
+    class Meta:
+        model = Component
+        fields = ('module', 'course', 'title')
+
+class ImageUploadForm(ComponentForm):
+    def __init__(self, *args, **kwargs):
         super(ImageUploadForm, self).__init__(*args, **kwargs)
+
+    class Meta:
+        model = ImageComponent
+        fields = ('image_details', 'image')
+
+class TextComponentForm(ComponentForm):
+    def __init__(self, *args, **kwargs):
+        super(TextComponentForm, self).__init__(*args, **kwargs)
+
+    class Meta(ComponentForm.Meta):
+        model = TextComponent
+        fields = ['text_passage']

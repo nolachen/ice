@@ -1,0 +1,57 @@
+<!-- All components in a course -->
+
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="course_components">
+    <h3>{{ course.name }} > Components</h3>
+
+    <a class="btn btn-primary" href="{% url 'courses:new_component' course_id=course.id type='text' %}">
+        Add new component
+    </a>
+
+    <table class="table">
+        <tr>
+            <th>Component title</th>
+            <th>Module</th>
+        </tr>
+        {% for component in components %}
+            <tr id="componentheader_{{ component.id }}">
+                <td>
+                    <button class="btn btn-link" type="button" data-toggle="collapse" data-target="#componentbody_{{ component.id }}">
+                        {{ component.title }}
+                    </button>
+                </td>
+                {% if component.module %}
+                    <td>{{ component.module.title }}</td>
+                {% else %}
+                    <td></td>
+                {% endif %}
+            </tr>
+    
+            <tr >
+                <td colspan="2" class="p-0">
+                    <div id="componentbody_{{ component.id }}" class="collapse p-3">
+                        <p>
+                            {{ component.text_passage }}
+                        </p>
+                        <div class="font-italic">
+                            Created {{ component.date_of_creation }}
+                        </div>
+                        <div class="font-italic">
+                            Updated {{ component.date_of_last_update }}
+                        </div>
+                        <a class="btn btn-primary" href="{% url 'courses:edit_component' course_id=course.id component_id=component.id %}">
+                            Edit component
+                        </a>
+                    </div>
+                </td>
+            </tr>
+        {% endfor %}
+    </table>
+
+</div>
+
+
+{% endblock %}
