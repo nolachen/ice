@@ -45,6 +45,9 @@
 /* Registration/Log In */
 
 /* Courses */
+.course-details-buttons > div {
+    margin: 5px;
+}
 
 /* Modules */
 
