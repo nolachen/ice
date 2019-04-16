@@ -4,7 +4,7 @@ from django.template import loader
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.urls import reverse
 
-from courses.forms import CourseForm, ModuleForm, QuizForm, ImageUploadForm
+from courses.forms import CourseForm, ModuleForm, QuizForm, ImageUploadForm, TextComponentForm
 from courses.models import *
 
 import logging
@@ -23,21 +23,19 @@ from django.urls import reverse_lazy
 def is_instructor(user):
     return Instructor.objects.filter(instructor_id=user.id).exists()
 
-
 def is_learner(user):
     return Learner.objects.filter(learner_id=user.id).exists()
 
 @login_required
 def view_course(request, course_id):
-    learner = Learner.objects.get(learner=request.user)
     course = Course.objects.get(id=course_id)
     modules = course.modules.order_by('index').all()
     available_modules = []
     locked_modules = []
     for module in modules:
         quiz = Quiz.objects.get(module=module)
-        quiz_result = QuizResult.objects.filter(learner=learner, quiz_id=quiz.id)
-        if quiz_result.filter(passed=True).exists():
+        quiz_result = QuizResult.objects.filter(learner__learner=request.user, quiz_id=quiz.id)
+        if is_instructor(request.user) or quiz_result.filter(passed=True).exists():
             available_modules.append(module)
         else:
             available_modules.append(module)
@@ -62,6 +60,68 @@ def load_components(request, course_id, module_id):
         'module_id': module_id,
         'quiz': quiz,
     })
+
+"""
+View for all of the components in a course
+"""
+@user_passes_test(is_instructor)
+def all_components(request, course_id):
+    course = Course.objects.get(id=course_id)
+    components = course.get_components()
+    return render(request, 'courses/components.html', {
+        'components': components,
+        'course': course
+    })
+
+@user_passes_test(is_instructor)
+def edit_component(request, course_id, component_id):
+    component = Component.objects.get(id=component_id)
+    # Submitting edited component
+    if request.method == 'POST':
+        pass
+    # Dispay the edit page
+    else:
+        return render(request, 'courses/component_edit.html', {
+            'component': component
+        })
+
+@user_passes_test(is_instructor)
+def new_component(request, course_id, type):
+    course = Course.objects.get(id=course_id)
+
+    if request.method == 'POST':
+        if type == 'image':
+            form = ImageUploadForm(request.POST, request.FILES, course_id=course_id)
+        elif type == 'text':
+            form = TextComponent(request.POST, course_id=course_id)
+        else:
+            raise Http404
+
+        if form.is_valid():
+            form = form.save(commit=False)
+            form.course = course
+            form.save()
+            return render(request, 'courses/component_details.html', {
+                'course_id': course_id,
+                'course': course,
+                'form': form,
+            })
+        else:
+            raise Http404
+
+    else:
+        if type == 'image':
+            form = ImageUploadForm(course_id=course_id)
+        elif type == 'text':
+            form = TextComponent(course_id=course_id)
+        else:
+            raise Http404
+        
+        return render(request, 'courses/create_image_component.html', { 
+        'form': form,
+            'course_id': course_id, 
+            'course': course,
+        }) 
 
 """
 Responsible for adding new courses

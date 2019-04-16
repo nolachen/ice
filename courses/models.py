@@ -42,6 +42,11 @@ class Course(models.Model):
         new_module = Module(name = moduleName, index = modulePosition, course = self)
         new_module.save()
 
+    def get_components(self):
+        # FIXME: Make this all component types not just Text
+        return TextComponent.objects.filter(course=self)
+        # return Component.objects.filter(course=self)
+
     def get_absolute_url(self):
         return reverse("courses:view_course", args={self.id})
 
@@ -60,7 +65,7 @@ class Module(models.Model):
     def save(self, *args, **kwargs):
         if not self.index:
             # Default the index to the last one in the sequence
-            self.index = self.course.modules.count() - 1
+            self.index = self.course.modules.count()
         super(Module, self).save(*args, **kwargs)
     
     def getComponents(self):
@@ -109,7 +114,7 @@ class QuizResult(models.Model):
     passed = models.BooleanField(default=False)
     timestamp = models.DateTimeField(auto_now_add=True)
 
-    def new_record(quiz_id, learner, result, passed):
+    def new_record(self, quiz_id, learner, result, passed):
         new_result = QuizResult(quiz_id=quiz_id, learner=learner, result=result, passed=passed)
         new_result.save()
 
@@ -134,7 +139,7 @@ class Component(models.Model):
     def save(self, *args, **kwargs):
         if not self.index:
             # Default the index to the last one in the sequence
-            self.index = self.course.components.count() - 1
+            self.index = self.course.components.count()
         super(Component, self).save(*args, **kwargs)
 
 class TextComponent(Component):
