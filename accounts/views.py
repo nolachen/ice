@@ -14,8 +14,11 @@ from django.template.loader import render_to_string
 from .tokens import account_activation_token
 from django.contrib.auth.models import User
 from django.core.mail import EmailMessage
+from django.db import IntegrityError
 
 from courses.models import Learner, Instructor
+
+import requests
 
 # USER IDENTITY HELPERS
 def is_superuser(user):
@@ -28,10 +31,34 @@ def signup(request):
     if request.method == 'POST':
         form = SignupForm(request.POST)
         if form.is_valid():
+            response = requests.get('https://gibice-hrserver.herokuapp.com/info/' + str(form.cleaned_data.get('staff_id')))
+            try:
+                json_data = response.json()
+            except ValueError:
+                return HttpResponse('Invalid staff ID!')
+            print(json_data)
+            print(json_data['first_name'])
+
             user = form.save(commit=False)
             user.is_active = False
             user.is_staff = True
             user.save()
+            user.email = json_data['email']
+            user.first_name = json_data['first_name']
+            user.last_name = json_data['last_name']
+            # Here I have to set something for the username, otherwise it will be blank
+            # when another user sign up for the site, there will be another blank username,
+            # hence the UNIQUE constraint will be failed
+            user.username = json_data['email']
+            try:
+                user.save()
+            except IntegrityError as e:
+                return HttpResponse('You have already signed up for the ICE System, please check your mail box for the activation email!')
+
+            learner = Learner(learner_id=user.id)
+            learner.staff_id = json_data['id']
+            learner.save()
+
             current_site = get_current_site(request)
             mail_subject = 'Activate your account.'
             message = render_to_string('registration/acc_active_email.html', {
@@ -40,7 +67,7 @@ def signup(request):
                 'uid': urlsafe_base64_encode(force_bytes(user.pk)).decode(),
                 'token': account_activation_token.make_token(user),
             })
-            to_email = form.cleaned_data.get('email')
+            to_email = json_data['email']
             email = EmailMessage(
                         mail_subject, message, to=[to_email]
             )
@@ -65,6 +92,7 @@ def invite(request):
         if form.is_valid():
             user = form.save(commit=False)
             user.is_active = False
+            #TODO: Using is_staff here may not be correct
             user.is_staff = False
             user.save()
             current_site = get_current_site(request)
@@ -115,8 +143,6 @@ def register_learner(request, user):
             user.set_password(form.cleaned_data['password2'])
             user.is_active = True
             user.save()
-            learner = Learner(learner_id=user.id)
-            learner.save()
         else:
             raise Http404
         return redirect('login')

@@ -2,13 +2,14 @@ from django.contrib.auth.models import User
 from django.urls import reverse
 from django.db import models
 from django import forms
-from django.core.validators import MaxValueValidator, MinValueValidator
+from django.core.validators import MaxValueValidator, MinValueValidator, MinLengthValidator
 
 class Learner(models.Model):
     learner = models.OneToOneField(
         User,
         on_delete=models.CASCADE
     )
+    staff_id = models.CharField(max_length=8, validators=[MinLengthValidator(8)], unique=True)
 
 class Instructor(models.Model):
     instructor = models.OneToOneField(
