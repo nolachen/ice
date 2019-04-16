@@ -107,6 +107,13 @@ def edit_module(request, course_id, module_id=None):
         'action_word': 'Add',
         'form': form
     })
+
+def delete_module(request, course_id=None, module_id=None):
+    instance = get_object_or_404(Module, id=module_id)
+    instance.delete()
+    return redirect('../../details')
+
+
 def take_quiz(request, quiz_id):
     quiz = Quiz.objects.get(id=quiz_id)
     questions=quiz.question_set.all()    

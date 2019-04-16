@@ -26,6 +26,7 @@
           {% for module in modules %}
             <li role="presentation" id="{{ module.id }}">
               <a data-toggle="tab" href="{% url 'courses:load_components' course.id module.id %}">{{ module.title }}</a>
+              <a href="{% url 'courses:delete_view' course.id module.id %}" module.id >Delete</a>
             </li>
           {% endfor %}
         </ul>
