@@ -18,6 +18,8 @@ from django.contrib.auth.forms import AuthenticationForm
 
 from django.urls import reverse_lazy
 
+from datetime import date
+
 
 # USER IDENTITY HELPERS
 def is_instructor(user):
@@ -127,6 +129,7 @@ def view_enrolled_course(request):
     for enrollment in not_completed_enrollments:
         not_completed_course.append(Course.objects.get(enrollment=enrollment))
     return render(request, 'courses/enrolled_course_list.html', {
+        'completed_enrollments': completed_enrollments,
         'completed_course': completed_course,
         'not_completed_course': not_completed_course,
     })
@@ -184,6 +187,14 @@ def take_quiz(request, course_id, module_id, quiz_id):
                     num_of_correct += 1
             if (num_of_correct >= quiz.passing_score * quiz.num_questions / 100):
                 passed = True
+                # Check if the module is the last module
+                module = Module.objects.get(id=module_id)
+                course = Course.objects.get(id=course_id)
+                if (module == course.modules.order_by('index').last()):
+                    enrollment = Enrollment.objects.get(learner=learner, course=course)
+                    enrollment.completed = True
+                    enrollment.completed_date = date.today()
+                    enrollment.save()
             else:
                 passed = False
             
