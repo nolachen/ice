@@ -3,6 +3,7 @@
 <html>
 <head>
   {% load staticfiles %}
+  {% load user_filters %}
   <meta charset="utf-8">
 
   <link rel="stylesheet" type="text/css" href="{% static 'css/styles.css' %}" />
@@ -14,9 +15,52 @@
   <title>{% block title %}ICE{% endblock %}</title>
 </head>
 <body>
-  <main>
-    {% block content %}
-    {% endblock %}
-  </main>
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+      <a class="navbar-brand" href="/">ICE</a>
+  </nav>
+  <div class="page">
+    <div class="sidenav">
+      {% if user.is_authenticated %}
+        <div class="sidenav-actions">
+          {% if user|is_instructor %}
+            <h3 class="text-center">Instructor Portal</h3>
+            <div>
+                <a class="btn btn-secondary w-100" href="{% url 'courses:add_course' %}">Create Course</a>
+            </div>
+            <div>
+                <a class="btn btn-secondary w-100" href="{% url 'courses:add_course' %}">Quiz Bank</a>
+            </div>
+            <div class="dropdown">
+                <a class="btn btn-secondary dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    Manage Courses
+                  </a>
+                  <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
+                    <a class="dropdown-item" href="#">All Courses</a>
+                    <a class="dropdown-item" href="#">All Modules</a>
+                    <a class="dropdown-item" href="#">All Components</a>
+                    </div>
+                </div>
+          {% else %}
+            <h3 class="text-center">Employee Portal</h3>
+            <div class="dropdown">
+              <a class="btn btn-secondary dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                  Manage Courses
+                </a>
+                <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
+                  <a class="dropdown-item" href="#">All Courses</a>
+                  <a class="dropdown-item" href="#">Uncompleted</a>
+                  <a class="dropdown-item" href="#">Completed</a>
+                  </div>
+              </div>
+          {% endif %}
+        </div>
+        <a class="btn btn-primary logout w-100" href="{% url 'logout' %}">Log Out</a>
+      {% endif %}
+    </div>
+    <div class="content">
+      {% block content %}
+      {% endblock %}
+    </div>
+  </div>
 </body>
 </html>
