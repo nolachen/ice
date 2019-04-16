@@ -10,6 +10,7 @@
     <a href="{% url 'courses:add_course' %}">Create Course</a>
   {% endif %}
   Hi {{ user.username }}!
+  <a href="{% url 'courses:view_enrolled_course'%}">Enrolled Courses</a>
   <p>Available Courses</p>
     <form action="" method="POST">
         {% csrf_token %}

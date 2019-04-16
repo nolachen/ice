@@ -10,7 +10,7 @@
       {% if course %}
       <p> Name: {{ course.name }}</p>
       <p> Category: {{ course.category }}</p>
-      <p> Insructor: {{ course.instructor.user.first_name }}</p>
+      <p> Insructor: {{ instructor.first_name }} {{ instructor.last_name }}</p>
       <p> Description: {{ course.description }}</p>
 
       </br>
@@ -45,7 +45,7 @@
         {% if is_enrolled %}
           <p>You have enrolled into this course! Enjoy!</p>
         {% else %}
-          <a href="{% url 'courses:enrol_course' course_id=course.id %}">Enrol</a>
+          <a href="{% url 'courses:enroll_course' course_id=course.id %}">Enroll</a>
         {% endif %}
       
       {% else %}
