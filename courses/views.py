@@ -186,17 +186,13 @@ def module_list(request, course_id):
 @user_passes_test(is_learner)
 def view_enrolled_course(request):
     learner = Learner.objects.get(learner=request.user)
-    completed_course = []
     not_completed_course = []
     completed_enrollments = Enrollment.objects.filter(learner=learner, completed=True)
-    for enrollment in completed_enrollments:
-        completed_course.append(Course.objects.get(enrollment=enrollment))
     not_completed_enrollments = Enrollment.objects.filter(learner=learner, completed=False)
     for enrollment in not_completed_enrollments:
         not_completed_course.append(Course.objects.get(enrollment=enrollment))
     return render(request, 'courses/enrolled_course_list.html', {
         'completed_enrollments': completed_enrollments,
-        'completed_course': completed_course,
         'not_completed_course': not_completed_course,
     })
 
