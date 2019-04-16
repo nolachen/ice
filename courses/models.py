@@ -155,6 +155,10 @@ class Enrollment(models.Model):
     completed = models.BooleanField(default=False)
     completed_date = models.DateField(null=True, blank=True)
 
+    def enrol(learner, course):
+        new_enrollment = Enrollment(learner=learner, course=course)
+        new_enrollment.save()
+
     def update_date(self, date):
         self.completed_date = date 
         self.save()

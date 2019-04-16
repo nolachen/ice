@@ -8,22 +8,41 @@
   <div class="row well">
     <div class="col-md-12">
 
-      {% if enrolled_course %}
+      {% if completed_enrollments %}
       <div class="container">
-        <h4>Enrolled Course</h4>
+        <h4>Completed Course</h4>
         <div class="row well">
           <div class="enrolled-course">
-            {% for course in enrolled_course %}
-              <a href="{% url 'courses:view_course' course_id=course.id %}">{{ course.name }}</a>
-              <br>
-              <br>
+            {% for enrollment in completed_enrollments %}
+                <div class="enrolled-course-completed">
+                  <a href="{% url 'courses:view_course' course_id=enrollment.course.id %}">{{ enrollment.course.name }}</a>
+                  <p>Completed Date: {{ enrollment.completed_date }}</p>
+                <br>
             {% endfor %}
           </div>
         </div>
       </div>
 
       {% else %}
-      <p>No enrolled course available</p>
+      <p>No completed course available</p>
+      {% endif %}
+
+      {% if not_completed_course %}
+      <div class="container">
+        <h4>Enrolled but Not Completed Course</h4>
+        <div class="row well">
+          <div class="enrolled-course">
+            {% for course in not_completed_course %}
+                <div class="enrolled-course-completed">
+                  <a href="{% url 'courses:view_course' course_id=course.id %}">{{ course.name }}</a>
+                <br>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+
+      {% else %}
+      <p>No completed course available</p>
       {% endif %}
 
     </div>

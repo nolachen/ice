@@ -10,8 +10,7 @@
       {% if course %}
       <p> Name: {{ course.name }}</p>
       <p> Category: {{ course.category }}</p>
-      <p> Insructor: {{ course.instructor_name }}</p>
-      <p> CECU Value: {{ course.cecu_value }} units</p>
+      <p> Insructor: {{ course.instructor.user.first_name }}</p>
       <p> Description: {{ course.description }}</p>
 
       </br>
@@ -39,12 +38,24 @@
         </ul>
       </div>
 
-      <h4>Components</h4>
-      <a href="{% url 'courses:all_components' course_id=course.id %}">View all components</a>
-      <a href="{% url 'courses:upload_image' course_id=course.id %}">Create An Image Component</a>
-
       </br>
+
+      {% if is_learner %}
+
+        {% if is_enrolled %}
+          <p>You have enrolled into this course! Enjoy!</p>
+        {% else %}
+          <a href="{% url 'courses:enrol_course' course_id=course.id %}">Enrol</a>
+        {% endif %}
       
+      {% else %}
+
+        <h4>Components</h4>
+        <a href="{% url 'courses:all_components' course_id=course.id %}">View all components</a>
+        <a href="{% url 'courses:upload_image' course_id=course.id %}">Create An Image Component</a>
+
+      {% endif %}
+
       {% else %}
       <p>No course information available for this course</p>
       {% endif %}
