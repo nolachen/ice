@@ -71,7 +71,7 @@ class ComponentForm(BaseForm):
 
     class Meta:
         model = Component
-        fields = ('module', 'title')
+        fields = ('module', 'title', 'index')
         help_texts = {
             'module': 'Optional'
         }

@@ -8,7 +8,11 @@
 {% if user.is_authenticated %}
   <h1 class="display-4">Hi {{ user.username }}!</h1>
   <br>
-  <a href="{% url 'courses:view_enrolled_course'%}">Enrolled Courses</a>
+  {% if user|is_learner %}
+  <h4>
+    <a href="{% url 'courses:view_enrolled_course'%}">Enrolled Courses</a>
+  </h4>
+  {% endif %}
   <h4>Available Courses</h4>
     <form action="" method="POST">
         {% csrf_token %}
