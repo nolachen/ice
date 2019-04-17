@@ -66,8 +66,10 @@ class ComponentForm(BaseForm):
         course_id = kwargs.pop('course_id')
         if not course_id:
             raise RuntimeError('Need course_id for ComponentForm')
+        super(ComponentForm, self).__init__(*args, **kwargs)        
+    
+        self.fields['module'].queryset = Module.objects.filter(course=course_id)
 
-        super(ComponentForm, self).__init__(*args, **kwargs)
 
     class Meta:
         model = Component
