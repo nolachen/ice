@@ -4,7 +4,7 @@
   {% block content %}
   <div class="container" style="padding-top:10px">
     <h4>Course Information</h4>
-    <div class="row well">
+    <div class="row ">
       <div class="col-md-12">
   
         {% if course %}
@@ -17,19 +17,19 @@
         
         <h4> Modules </h4>
         <div id="moduleContainer">
-          <ul class="nav nav-tabs" id="available_modules">
-            <h5> Available Modules </h5>
+          <h5> Available Modules </h5>
+          <ul id="available_modules">
             {% for module in available_modules %}
               <li role="presentation" id="{{ module.id }}">
-                <a data-toggle="tab" href="{% url 'courses:load_components' course_id=course.id module_id=module.id %}">{{ module.title }}</a>
+                <a href="{% url 'courses:load_components' course_id=course.id module_id=module.id %}">{{ module.title }}</a>
               </li>
             {% endfor %}
           </ul>
   
           <br>
-  
-          <ul class="nav nav-tabs" id="locked_modules">
-            <h5> Locked Modules </h5>
+          
+          <h5> Locked Modules </h5>
+          <ul id="locked_modules">
             {% for module in locked_modules %}
               <li role="presentation" id="{{ module.id }}">
                 <p>{{ module.title }}</p>

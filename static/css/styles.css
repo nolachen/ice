@@ -179,8 +179,8 @@
 
 /* Courses */
 .container {
-    display: flex;
-    flex-direction: row;
+    /* display: flex; */
+    /* flex-direction: row; */
 }
 .course-details-buttons > div {
     margin: 5px;
