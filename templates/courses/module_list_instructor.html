@@ -1,3 +1,6 @@
+{% extends 'base.html' %}
+
+{% block content %}
 <h1>{{ course.name }} > All Modules</h1>
 
 <div>
@@ -8,3 +11,4 @@
     </ol>     
     <a href="{% url 'new_module' course_id=course.id %}">New module</a>    
 </div>
+{% endblock %}

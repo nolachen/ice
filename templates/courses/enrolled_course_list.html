@@ -1,9 +1,10 @@
-{% load staticfiles %}
-<head>
-  <title>All Enrolled Courses</title>
-</head>
+{% extends 'base.html' %}
 
-<div class="container" style="padding-top:10px">
+{% load staticfiles %}
+{% block title %}All Enrolled Courses{% endblock %}
+
+{% block content %}
+<div class="enrolled-courses-container" style="padding-top:10px">
   <h4>All Enrolled Courses</h4>
   <div class="row well">
     <div class="col-md-12">
@@ -48,3 +49,4 @@
     </div>
   </div>
 </div>
+{% endblock %}
