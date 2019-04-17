@@ -7,9 +7,17 @@
 <div class="course_components">
     <h3>{{ course.name }} > Components</h3>
 
-    <a class="btn btn-primary" href="{% url 'courses:new_component' course_id=course.id type='text' %}">
-        Add new component
-    </a>
+    <div class="dropdown">
+        <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown">Add new component</button>
+        <div class="dropdown-menu">
+            <a class="dropdown-item" href="{% url 'courses:new_component' course_id=course.id type='text' %}">
+                Text
+            </a>
+            <a class="dropdown-item" href="{% url 'courses:new_component' course_id=course.id type='image' %}">
+                Image
+            </a>
+        </div>
+    </div>
 
     <table class="table">
         <tr>
@@ -17,6 +25,7 @@
             <th>Module</th>
         </tr>
         {% for component in components %}
+            {% with child_component=component.get_child_component %}
             <tr id="componentheader_{{ component.id }}">
                 <td>
                     <button class="btn btn-link" type="button" data-toggle="collapse" data-target="#componentbody_{{ component.id }}">
@@ -34,7 +43,7 @@
                 <td colspan="2" class="p-0">
                     <div id="componentbody_{{ component.id }}" class="collapse p-3">
                         <p>
-                            {{ component.text_passage }}
+                            {{ child_component.get_html_representation }}
                         </p>
                         <div class="font-italic">
                             Created {{ component.date_of_creation }}
@@ -48,6 +57,7 @@
                     </div>
                 </td>
             </tr>
+            {% endwith %}
         {% endfor %}
     </table>
 
