@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load user_filters %}
 
   {% block title %}Home{% endblock %}
   {% block content %}
@@ -16,7 +17,9 @@
         </br>
         
         <h4> Modules </h4>
+        {% if user|is_instructor %}
         <a href="{% url 'courses:new_module' course_id=course.id %}">Create module</a>
+        {% endif %}
         <div id="moduleContainer">
           <h5> Available Modules </h5>
           <ul id="available_modules">
