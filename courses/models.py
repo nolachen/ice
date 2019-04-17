@@ -2,13 +2,15 @@ from django.contrib.auth.models import User
 from django.urls import reverse
 from django.db import models
 from django import forms
-from django.core.validators import MaxValueValidator, MinValueValidator
+from django.utils.html import format_html
+from django.core.validators import MaxValueValidator, MinValueValidator, MinLengthValidator
 
 class Learner(models.Model):
     learner = models.OneToOneField(
         User,
         on_delete=models.CASCADE
     )
+    staff_id = models.CharField(max_length=8, validators=[MinLengthValidator(8)], unique=True)
 
 class Instructor(models.Model):
     instructor = models.OneToOneField(
@@ -42,6 +44,11 @@ class Course(models.Model):
         new_module = Module(name = moduleName, index = modulePosition, course = self)
         new_module.save()
 
+    def get_components(self):
+        # FIXME: Make this all component types not just Text
+        return Component.objects.filter(course=self)
+        # return Component.objects.filter(course=self)
+
     def get_absolute_url(self):
         return reverse("courses:view_course", args={self.id})
 
@@ -60,7 +67,7 @@ class Module(models.Model):
     def save(self, *args, **kwargs):
         if not self.index:
             # Default the index to the last one in the sequence
-            self.index = self.course.modules.count() - 1
+            self.index = self.course.modules.count()
         super(Module, self).save(*args, **kwargs)
     
     def getComponents(self):
@@ -125,6 +132,15 @@ class Component(models.Model):
     # Order within the module
     index = models.IntegerField()
 
+    TEXT = 'TX'
+    IMAGE = 'IM'
+    COMPONENT_TYPES = (
+        (TEXT, 'Text'),
+        (IMAGE, 'Image')
+    )
+    # Store the child component type so we can access it
+    component_type = models.CharField(max_length=2, choices=COMPONENT_TYPES)
+
     class Meta:
         ordering = ['index']
 
@@ -134,15 +150,34 @@ class Component(models.Model):
     def save(self, *args, **kwargs):
         if not self.index:
             # Default the index to the last one in the sequence
-            self.index = self.course.components.count() - 1
+            self.index = self.course.components.count()
         super(Component, self).save(*args, **kwargs)
 
+    def get_child_component(self):
+        print("Component type", self.component_type)
+        if self.component_type == Component.TEXT:
+            return self.textcomponent
+        elif self.component_type == Component.IMAGE:
+            return self.imagecomponent
+        else:
+            raise TypeError
+    
+    def get_html_representation(self):
+        raise NotImplementedError
+
+# Note: all subclasses of Component MUST have override get_html_representation method
 class TextComponent(Component):
     text_passage = models.TextField()
 
+    def get_html_representation(self):
+        return format_html("<p>{}</p>", self.text_passage)
+
 class ImageComponent(Component):
-    image_details = models.CharField(max_length=200)
-    image = models.ImageField(default=None, blank=True, null=True, upload_to='images/')
+    image_details = models.TextField()
+    image = models.ImageField(upload_to='images/')
+
+    def get_html_representation(self):
+        return format_html("<div><img src={} /><p>{}</p></div>", self.image.url, self.image_details)
 
 class Enrollment(models.Model):
     course = models.ForeignKey(Course, on_delete=models.CASCADE)
@@ -150,6 +185,6 @@ class Enrollment(models.Model):
     completed = models.BooleanField(default=False)
     completed_date = models.DateField(null=True, blank=True)
 
-    def update_date(self, date):
-        self.completed_date = date 
-        self.save()
+    def enroll(learner, course):
+        new_enrollment = Enrollment(learner=learner, course=course)
+        new_enrollment.save()
