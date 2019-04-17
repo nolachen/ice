@@ -1,3 +1,6 @@
+{% extends 'base.html' %}
+
+{% block content %}
 <form action="" method="POST">
     {% if passed == True %}
     <p>You have already passed the quiz.</p>
@@ -9,3 +12,4 @@
     <input type="submit" value="Submit">
     {% endif %}
 </form>
+{% endblock %}
