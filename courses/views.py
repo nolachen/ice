@@ -4,7 +4,7 @@ from django.template import loader
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.urls import reverse
 
-from courses.forms import CourseForm, ModuleForm, QuizForm, ImageUploadForm
+from courses.forms import CourseForm, ModuleForm, QuizForm, ImageUploadForm, TextComponentForm, SelectCategoryForm
 from courses.models import *
 
 import logging
@@ -18,50 +18,146 @@ from django.contrib.auth.forms import AuthenticationForm
 
 from django.urls import reverse_lazy
 
+from datetime import date
+
 
 # USER IDENTITY HELPERS
 def is_instructor(user):
     return Instructor.objects.filter(instructor_id=user.id).exists()
-
 
 def is_learner(user):
     return Learner.objects.filter(learner_id=user.id).exists()
 
 @login_required
 def view_course(request, course_id):
-    learner = Learner.objects.get(learner=request.user)
+    is_enrolled = False
     course = Course.objects.get(id=course_id)
+    instructor = User.objects.get(id=course.instructor.instructor_id)
     modules = course.modules.order_by('index').all()
     available_modules = []
     locked_modules = []
-    for module in modules:
-        quiz = Quiz.objects.get(module=module)
-        quiz_result = QuizResult.objects.filter(learner=learner, quiz_id=quiz.id)
-        if quiz_result.filter(passed=True).exists():
-            available_modules.append(module)
+
+    if is_instructor(request.user):
+        available_modules = modules
+    else:
+        for module in modules:
+            if Quiz.objects.filter(module=module).exists():
+                quiz = Quiz.objects.get(module=module)
+                quiz_result = QuizResult.objects.filter(learner__learner=request.user, quiz_id=quiz.id)
+                if quiz_result.filter(passed=True).exists():
+                    available_modules.append(module)
+                else:
+                    available_modules.append(module)
+                    module_index = list(modules).index(module) + 1
+                    locked_modules = modules[module_index:]
+                    break
+
+    if is_learner(request.user):
+        learner = Learner.objects.get(learner_id=request.user.id)
+        enrollments = Enrollment.objects.filter(learner=learner)
+        if enrollments.filter(course=course).exists():
+            is_enrolled = True
         else:
-            available_modules.append(module)
-            module_index = list(modules).index(module) + 1
-            locked_modules = modules[module_index:]
-            break
-    print(available_modules)
-    print(locked_modules)
+            available_modules = []
+            locked_modules = modules
+    
     return render(request, 'courses/course_details.html', {
         'course': course,
+        'instructor': instructor,
+        'is_learner': is_learner(request.user),
+        'is_enrolled': is_enrolled,
         'available_modules': available_modules,
         'locked_modules': locked_modules,
     })
+
+@user_passes_test(is_learner)
+def enroll_course(request, course_id):
+    learner = Learner.objects.get(learner_id=request.user.id)
+    course = Course.objects.get(id=course_id)
+    Enrollment.enroll(learner, course)
+    return redirect('courses:view_enrolled_course')
 
 def load_components(request, course_id, module_id):  
     module = Module.objects.get(id=module_id)
     components = module.getComponents().order_by("index")
     quiz = Quiz.objects.get(module_id=module_id)
     return render(request, 'courses/component_list.html', {
+        'is_learner': is_learner(request.user),
         'components': components,
         'course_id': course_id,
         'module_id': module_id,
         'quiz': quiz,
     })
+
+"""
+View for all of the components in a course
+"""
+@user_passes_test(is_instructor)
+def all_components(request, course_id):
+    course = Course.objects.get(id=course_id)
+    components = course.get_components()
+    return render(request, 'courses/components.html', {
+        'components': components,
+        'course': course
+    })
+
+@user_passes_test(is_instructor)
+def edit_component(request, course_id, component_id):
+    component = Component.objects.get(id=component_id)
+    course = Course.objects.get(id=course_id)
+    # Submitting edited component
+    if request.method == 'POST':
+        pass
+    # Dispay the edit page
+    else:
+        return render(request, 'courses/component_edit.html', {
+            'component': component,
+            'course': course
+        })
+
+@user_passes_test(is_instructor)
+def new_component(request, course_id, type):
+    type_to_component_type = { 'image': Component.IMAGE, 'text': Component.TEXT }
+    course = Course.objects.get(id=course_id)
+
+    if request.method == 'POST':
+        if type == 'image':
+            form = ImageUploadForm(request.POST, request.FILES, course_id=course_id)
+        elif type == 'text':
+            form = TextComponentForm(request.POST, course_id=course_id)
+        else:
+            raise Http404
+
+        if form.is_valid():
+            form = form.save(commit=False)
+            form.course = course
+            form.component_type = type_to_component_type[type]
+            form.save()
+            component_url = reverse("courses:all_components", kwargs={'course_id': course_id})
+            return HttpResponseRedirect(component_url)
+        else:
+            print(form.errors)
+            print(form.non_field_errors)
+            # Re-render the form, so the errors will show
+            return render(request, 'courses/component_edit.html', { 
+                'form': form,
+                'course': course,
+            }) 
+
+    else:
+        if type == 'image':
+            form = ImageUploadForm(course_id=course_id)
+            template = 'courses/component_edit.html'
+        elif type == 'text':
+            form = TextComponentForm(course_id=course_id)
+            template = 'courses/component_edit.html'
+        else:
+            raise Http404
+        
+        return render(request, template, { 
+            'form': form,
+            'course': course,
+        }) 
 
 """
 Responsible for adding new courses
@@ -86,9 +182,22 @@ def add_course(request):
     })
 
 def home(request):
+    if request.POST:
+        form = SelectCategoryForm(request.POST)
+        if form.is_valid():
+            if form.cleaned_data['category'] == 'all':
+                courses = Course.objects.all()
+            else:
+                courses = Course.objects.filter(category=form.cleaned_data['category'])
+            return render(request, 'home.html', {
+                'courses': courses,
+                'form': form,
+            })
     courses = Course.objects.all()
+    form = SelectCategoryForm()
     return render(request, 'home.html', {
         'courses': courses,
+        'form': form,
     })
 
 # @login_required
@@ -108,12 +217,14 @@ def module_list(request, course_id):
 @user_passes_test(is_learner)
 def view_enrolled_course(request):
     learner = Learner.objects.get(learner=request.user)
-    enrolled_course = []
-    enrollments = Enrollment.objects.filter(learner=learner)
-    for enrollment in enrollments:
-        enrolled_course.append(Course.objects.get(enrollment=enrollment))
+    not_completed_course = []
+    completed_enrollments = Enrollment.objects.filter(learner=learner, completed=True)
+    not_completed_enrollments = Enrollment.objects.filter(learner=learner, completed=False)
+    for enrollment in not_completed_enrollments:
+        not_completed_course.append(Course.objects.get(enrollment=enrollment))
     return render(request, 'courses/enrolled_course_list.html', {
-        'enrolled_course': enrolled_course,
+        'completed_enrollments': completed_enrollments,
+        'not_completed_course': not_completed_course,
     })
 
 @user_passes_test(is_instructor)
@@ -130,7 +241,7 @@ def edit_module(request, course_id, module_id=None):
             form = form.save(commit=False)
             form.course = course
             form.save()
-            url = reverse("module_list", kwargs={'course_id': course_id})
+            url = reverse("courses:module_list", kwargs={'course_id': course_id})
             return HttpResponseRedirect(url)
         else:
             raise Http404
@@ -169,6 +280,14 @@ def take_quiz(request, course_id, module_id, quiz_id):
                     num_of_correct += 1
             if (num_of_correct >= quiz.passing_score * quiz.num_questions / 100):
                 passed = True
+                # Check if the module is the last module
+                module = Module.objects.get(id=module_id)
+                course = Course.objects.get(id=course_id)
+                if (module == course.modules.order_by('index').last()):
+                    enrollment = Enrollment.objects.get(learner=learner, course=course)
+                    enrollment.completed = True
+                    enrollment.completed_date = date.today()
+                    enrollment.save()
             else:
                 passed = False
             

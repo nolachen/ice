@@ -44,6 +44,139 @@
 
 /* Registration/Log In */
 
+#login_button{
+    background-color:blue;
+    border-radius:5px;
+    padding: 10px 10px 10px 10px;
+    margin-right: 30px;
+    color:white;
+    text-decoration: none;
+    box-shadow: 0px 8px 15px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease 0s;
+    display:inline-block;
+}
+
+#login_button:hover{
+    transform: translateY(-7px);
+    box-shadow: 0px 5px 10px blue;
+    color: #fff;
+    background-color:	blue;
+}
+
+#signup_button{
+
+    background-color:green;
+    box-shadow: 0px 8px 15px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease 0s;
+    border-radius:5px;
+    padding: 10px 10px 10px 10px;
+    margin-left:30px;
+    color:white;
+    text-decoration: none;
+    display:inline-block;
+}
+
+#signup_button:hover{
+    transform: translateY(-7px);
+    box-shadow: 0px 5px 10px green;
+    color: #fff;
+    background-color:	green;
+}
+
+#container{
+    text-align: center;
+}
+
+#home_form{
+    text-align: center;
+    margin-top: 15%;
+    border: 1px solid black;
+    border-radius: 10px;
+    width: 500px;
+    margin-left: 400px;
+    padding-top:30px;
+    padding-bottom:30px;
+}
+
+#login_form{
+    margin-top:65px;
+}
+
+.divider{
+    border: 0;
+    height: 1px;
+    background-image: linear-gradient(to right, rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.75), rgba(0, 0, 0, 0));
+}
+
+#login_page{
+    text-align: center;
+    margin-top: 15%;
+    border: 1px solid black;
+    border-radius: 10px;
+    width: 500px;
+    margin-left: 400px;
+    padding-top:30px;
+    padding-bottom:30px;
+}
+
+#login_page_button{
+    background-color:blue;
+    border-radius:5px;
+    padding: 10px 10px 10px 10px;
+    margin-right: 30px;
+    color:white;
+    text-decoration: none;
+    box-shadow: 0px 8px 15px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease 0s;
+    display:inline-block;
+    width:200px;
+    margin-left:30px;
+    border-color: blue;
+    margin-top:30px;
+}
+
+#login_page_button:hover{
+    transform: translateY(-7px);
+    box-shadow: 0px 5px 10px blue;
+    color: #fff;
+    background-color:	blue;
+}
+
+#sign_up_page{
+    text-align: center;
+    margin-top: 15%;
+    border: 1px solid black;
+    border-radius: 10px;
+    width: 500px;
+    margin-left: 400px;
+    padding-top:30px;
+    padding-bottom:30px;
+}
+
+#signup_page_button{
+    background-color:green;
+    border-radius:5px;
+    padding: 10px 10px 10px 10px;
+    margin-right: 30px;
+    color:white;
+    text-decoration: none;
+    box-shadow: 0px 8px 15px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease 0s;
+    display:inline-block;
+    width:200px;
+    margin-left:30px;
+    border-color: green;
+    margin-top:30px;
+}
+
+
+#signup_page_button:hover{
+    transform: translateY(-7px);
+    box-shadow: 0px 5px 10px green;
+    color: #fff;
+    background-color:	green;
+}
+
 /* Courses */
 .container {
     display: flex;
@@ -56,3 +189,5 @@
 /* Modules */
 
 /* Quiz */
+
+/* Global styles */
