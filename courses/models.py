@@ -154,7 +154,6 @@ class Component(models.Model):
         super(Component, self).save(*args, **kwargs)
 
     def get_child_component(self):
-        print("Component type", self.component_type)
         if self.component_type == Component.TEXT:
             return self.textcomponent
         elif self.component_type == Component.IMAGE:

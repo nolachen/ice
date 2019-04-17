@@ -116,23 +116,35 @@ def edit_component(request, course_id, component_id):
         })
 
 @user_passes_test(is_instructor)
-def new_component(request, course_id, type):
+def new_component(request, course_id, type=None, component_id=None):
     type_to_component_type = { 'image': Component.IMAGE, 'text': Component.TEXT }
     course = Course.objects.get(id=course_id)
 
+    # You can only access this page if you own the course
+    if request.user != course.instructor.instructor:
+        raise Http404
+
+    if component_id:
+        component = Component.objects.get(id=component_id).get_child_component()
+        component_type = component.component_type
+        print("type", component_type)
+    else:
+        component = None
+        component_type = type_to_component_type[type]
+
     if request.method == 'POST':
-        if type == 'image':
-            form = ImageUploadForm(request.POST, request.FILES, course_id=course_id)
-        elif type == 'text':
-            form = TextComponentForm(request.POST, course_id=course_id)
+        if component_type == Component.IMAGE:
+            form = ImageUploadForm(request.POST, request.FILES, course_id=course_id, instance=component)
+        elif component_type == Component.TEXT:
+            form = TextComponentForm(request.POST, course_id=course_id, instance=component)
         else:
             raise Http404
 
         if form.is_valid():
-            form = form.save(commit=False)
-            form.course = course
-            form.component_type = type_to_component_type[type]
-            form.save()
+            new_component = form.save(commit=False)
+            new_component.course = course
+            new_component.component_type = component_type
+            new_component.save()
             component_url = reverse("courses:all_components", kwargs={'course_id': course_id})
             return HttpResponseRedirect(component_url)
         else:
@@ -145,19 +157,23 @@ def new_component(request, course_id, type):
             }) 
 
     else:
-        if type == 'image':
-            form = ImageUploadForm(course_id=course_id)
+        if component_type == Component.IMAGE:
+            form = ImageUploadForm(instance=component, course_id=course_id)
             template = 'courses/component_edit.html'
-        elif type == 'text':
-            form = TextComponentForm(course_id=course_id)
+        elif component_type == Component.TEXT:
+            form = TextComponentForm(instance=component, course_id=course_id)
             template = 'courses/component_edit.html'
         else:
             raise Http404
-        
-        return render(request, template, { 
+
+        context = {
             'form': form,
             'course': course,
-        }) 
+        }
+        if component:
+            context['component'] = component
+        
+        return render(request, template, context) 
 
 """
 Responsible for adding new courses
@@ -232,6 +248,10 @@ def edit_module(request, course_id, module_id=None):
     # TODO: Restrict this to only instructors who own the course the module belongs to
 
     course = Course.objects.get(id=course_id)
+
+    # You can only access this page if you own the course
+    if request.user != course.instructor.instructor:
+        raise Http404
 
     # process form data
     if request.method == 'POST':
@@ -309,41 +329,41 @@ def take_quiz(request, course_id, module_id, quiz_id):
         "form": form,
     })
 
-def view_component(request, course_id):
-    course = Course.objects.get(id=course_id)
-    template = 'courses/component_details.html'
+# def view_component(request, course_id):
+#     course = Course.objects.get(id=course_id)
+#     template = 'courses/component_details.html'
 
-    return render(request, template, {
-        'course': course
-    })
+#     return render(request, template, {
+#         'course': course
+#     })
 
-@user_passes_test(is_instructor)
-def upload_image(request, course_id):
-    course = Course.objects.get(id=course_id)
+# @user_passes_test(is_instructor)
+# def upload_image(request, course_id):
+#     course = Course.objects.get(id=course_id)
 
-    if request.method == 'POST':
-        form = ImageUploadForm(request.POST, request.FILES, course_id=course_id)
-        if form.is_valid():
-            form = form.save(commit=False)
-            form.course = course
-            form.save()
-            return render(request, 'courses/component_details.html', {
-                'course_id': course_id,
-                'course': course,
-                'form': form,
-            })
-        else:
-            raise Http404
+#     if request.method == 'POST':
+#         form = ImageUploadForm(request.POST, request.FILES, course_id=course_id)
+#         if form.is_valid():
+#             form = form.save(commit=False)
+#             form.course = course
+#             form.save()
+#             return render(request, 'courses/component_details.html', {
+#                 'course_id': course_id,
+#                 'course': course,
+#                 'form': form,
+#             })
+#         else:
+#             raise Http404
 
-        return render(request, 'courses/component_details.html', {
-            'course_id': course_id,
-            'course': course,
-        })
-    else:
-        form = ImageUploadForm(request.POST, request.FILES, course_id=course_id)
+#         return render(request, 'courses/component_details.html', {
+#             'course_id': course_id,
+#             'course': course,
+#         })
+#     else:
+#         form = ImageUploadForm(request.POST, request.FILES, course_id=course_id)
     
-    return render(request, 'courses/create_image_component.html', { 
-        'form': form,
-        'course_id': course_id, 
-        'course': course,
-    })
+#     return render(request, 'courses/create_image_component.html', { 
+#         'form': form,
+#         'course_id': course_id, 
+#         'course': course,
+#     })

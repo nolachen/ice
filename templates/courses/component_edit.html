@@ -32,7 +32,8 @@
                 {% endif %}
             </div>
         {% endfor %}
-        <input type="submit" value="Submit">
+        <input class="btn btn-success" type="submit" value="Submit">
+        <a class="btn btn-danger" href="{% url 'courses:all_components' course_id=course.id %}">Cancel</a>
     </form>
     
 </div>

@@ -5,7 +5,7 @@
 {% block content %}
 
 <div class="course_components">
-    <h3>{{ course.name }} > Components</h3>
+    <h3><a href="{% url 'courses:view_course' course_id=course.id %}">{{ course.name }}</a> > Components</h3>
 
     <div class="dropdown">
         <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown">Add new component</button>
