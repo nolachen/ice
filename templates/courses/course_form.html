@@ -1,5 +1,22 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+<h1>Create Course</h1>
 <form action="" method="POST">
     {% csrf_token %}
-    {{ form }}
-    <input type="submit" value="Submit">
+    <div class="row">
+        <div class="col-6">
+            {{ form.name|as_crispy_field }}
+        </div>
+        <div class="col-6">
+            {{ form.cecu_value|as_crispy_field }}
+        </div>
+        <div class="col-6">
+            {{ form.category|as_crispy_field }}
+        </div>
+    </div>
+    {{ form.description|as_crispy_field }}
+    <button type="submit" class="btn btn-success">Submit</button>
 </form>
+{% endblock %}

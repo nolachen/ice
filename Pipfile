@@ -10,6 +10,7 @@ pylint = "*"
 django = "*"
 pillow = "*"
 requests = "*"
+django-crispy-forms = "*"
 
 [requires]
 python_version = "3.7"

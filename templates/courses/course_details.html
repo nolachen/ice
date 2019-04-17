@@ -1,54 +1,54 @@
-<head>
-  <title>Course Details</title>
-</head>
+{% extends 'base.html' %}
 
-<div class="container" style="padding-top:10px">
-  <h4>Course Information</h4>
-  <div class="row well">
-    <div class="col-md-12">
-
-      {% if course %}
-      <p> Name: {{ course.name }}</p>
-      <p> Category: {{ course.category }}</p>
-      <p> Insructor: {{ instructor.first_name }} {{ instructor.last_name }}</p>
-      <p> Description: {{ course.description }}</p>
-
-      </br>
-      
-      <h4> Modules </h4>
-      <div id="moduleContainer">
-        <ul class="nav nav-tabs" id="available_modules">
-          <h5> Available Modules </h5>
-          {% for module in available_modules %}
-            <li role="presentation" id="{{ module.id }}">
-              <a data-toggle="tab" href="{% url 'courses:load_components' course_id=course.id module_id=module.id %}">{{ module.title }}</a>
-            </li>
-          {% endfor %}
-        </ul>
-
-        <br>
-
-        <ul class="nav nav-tabs" id="locked_modules">
-          <h5> Locked Modules </h5>
-          {% for module in locked_modules %}
-            <li role="presentation" id="{{ module.id }}">
-              <p>{{ module.title }}</p>
-            </li>
-          {% endfor %}
-        </ul>
-      </div>
-
-      </br>
-
-      {% if is_learner %}
-
-        {% if is_enrolled %}
-          <p>You have enrolled into this course! Enjoy!</p>
+  {% block title %}Home{% endblock %}
+  {% block content %}
+  <div class="container" style="padding-top:10px">
+    <h4>Course Information</h4>
+    <div class="row well">
+      <div class="col-md-12">
+  
+        {% if course %}
+        <p> Name: {{ course.name }}</p>
+        <p> Category: {{ course.category }}</p>
+        <p> Insructor: {{ instructor.first_name }} {{ instructor.last_name }}</p>
+        <p> Description: {{ course.description }}</p>
+  
+        </br>
+        
+        <h4> Modules </h4>
+        <div id="moduleContainer">
+          <ul class="nav nav-tabs" id="available_modules">
+            <h5> Available Modules </h5>
+            {% for module in available_modules %}
+              <li role="presentation" id="{{ module.id }}">
+                <a data-toggle="tab" href="{% url 'courses:load_components' course_id=course.id module_id=module.id %}">{{ module.title }}</a>
+              </li>
+            {% endfor %}
+          </ul>
+  
+          <br>
+  
+          <ul class="nav nav-tabs" id="locked_modules">
+            <h5> Locked Modules </h5>
+            {% for module in locked_modules %}
+              <li role="presentation" id="{{ module.id }}">
+                <p>{{ module.title }}</p>
+              </li>
+            {% endfor %}
+          </ul>
+        </div>
+  
+        </br>
+  
+        {% if is_learner %}
+  
+          {% if is_enrolled %}
+            <p>You have enrolled into this course! Enjoy!</p>
+          {% else %}
+            <a href="{% url 'courses:enroll_course' course_id=course.id %}">Enroll</a>
+          {% endif %}
+        
         {% else %}
-          <a href="{% url 'courses:enroll_course' course_id=course.id %}">Enroll</a>
-        {% endif %}
-      
-      {% else %}
 
         <h4>Components</h4>
         <a href="{% url 'courses:all_components' course_id=course.id %}">View all components</a>
@@ -61,4 +61,4 @@
 
     </div>
   </div>
-</div>
+  {% endblock %}

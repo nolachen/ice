@@ -6,24 +6,27 @@
 
 {% block content %}
 {% if user.is_authenticated %}
-  {% if user|is_instructor %}
-    <a href="{% url 'courses:add_course' %}">Create Course</a>
-  {% endif %}
-  Hi {{ user.username }}!
+  <h1 class="display-4">Hi {{ user.username }}!</h1>
+  <br>
   <a href="{% url 'courses:view_enrolled_course'%}">Enrolled Courses</a>
-  <p>Available Courses</p>
+  <h4>Available Courses</h4>
     <form action="" method="POST">
         {% csrf_token %}
         {{ form }}
         <input type="submit" value="Submit">
     </form>
-    <ol>
-    {% for course in courses %}
-    <li><a href="{% url 'courses:view_course' course.id %}">{{ course.name }}</a></li>
-    <p> {{ course.description }} <p>
-    {% endfor %}
-    </ol>
-  <p><a href="{% url 'logout' %}">logout</a></p>
+    <div class="course-grid">
+      {% for course in courses %}
+        <div class="card" style="width: 18rem;">
+          <div class="card-body">
+            <h5 class="card-title">{{ course.name }}</h5>
+            <h6 class="card-subtitle mb-2 text-muted">{{ course.category }}</h6>
+            <p class="card-text">{{ course.description }}</p>
+            <a class="btn btn-secondary w-100" href="{% url 'courses:view_course' course.id %}" class="card-link">View Details</a>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
 {% else %}
 <div id="container">
 <div id="home_form">
