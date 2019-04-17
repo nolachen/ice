@@ -62,6 +62,7 @@ def view_course(request, course_id):
             locked_modules = modules
     
     return render(request, 'courses/course_details.html', {
+        'user': request.user,
         'course': course,
         'instructor': instructor,
         'is_learner': is_learner(request.user),
