@@ -209,7 +209,10 @@ def home(request):
                 'courses': courses,
                 'form': form,
             })
-    courses = Course.objects.all()
+    if is_instructor(request.user):
+        courses = Course.objects.filter(instructor=Instructor.objects.get(instructor=request.user))
+    else:
+        courses = Course.objects.all()
     form = SelectCategoryForm()
     return render(request, 'home.html', {
         'courses': courses,
