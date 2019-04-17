@@ -36,8 +36,8 @@
                   </a>
                   <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
                     <a class="dropdown-item" href="#">All Courses</a>
-                    <a class="dropdown-item" href="#">All Modules</a>
-                    <a class="dropdown-item" href="#">All Components</a>
+                    <a class="dropdown-item" href="{% url 'courses:module_list' ">All Modules</a>
+                    <a class="dropdown-item" href="{% url 'courses:all_components' %}">All Components</a>
                     </div>
                 </div>
           {% else %}
@@ -47,9 +47,9 @@
                   Manage Courses
                 </a>
                 <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
-                  <a class="dropdown-item" href="#">All Courses</a>
-                  <a class="dropdown-item" href="#">Uncompleted</a>
-                  <a class="dropdown-item" href="#">Completed</a>
+                  <a class="dropdown-item" href="{% url 'courses:view_enrolled_course'%}">All Courses</a>
+                  <a class="dropdown-item" href="{% url 'courses:view_enrolled_course'%}">Uncompleted</a>
+                  <a class="dropdown-item" href="{% url 'courses:view_enrolled_course'%}">Completed</a>
                   </div>
               </div>
           {% endif %}
