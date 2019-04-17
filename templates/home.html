@@ -25,8 +25,15 @@
     </ol>
   <p><a href="{% url 'logout' %}">logout</a></p>
 {% else %}
-  <p class="alt-text">You are not logged in</p>
-  <a href="{% url 'login' %}">login</a>
-  <a href="{% url 'signup' %}">signup</a>
+<div id="container">
+<div id="home_form">
+  <h2 class="alt-text">Welcome to ICE Portal</h2>
+  <hr class="divider">
+  <div id="login_form">
+  <a id="login_button" href="{% url 'login' %}">Login</a>
+  <a id="signup_button" href="{% url 'signup' %}">Signup</a>
+    </div>
+</div>
+</div>
 {% endif %}
 {% endblock %}
