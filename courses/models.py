@@ -71,7 +71,7 @@ class Module(models.Model):
         super(Module, self).save(*args, **kwargs)
     
     def getComponents(self):
-        return TextComponent.objects.filter(module=self)
+        return Component.objects.filter(module=self)
 
 class Quiz(models.Model):
     title = models.CharField(max_length=200)

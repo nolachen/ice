@@ -45,7 +45,7 @@
                   Manage Courses
                 </a>
                 <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
-                  <a class="dropdown-item" href="{% url 'courses:view_enrolled_course'%}">All Courses</a>
+                  <a class="dropdown-item" href="{% url 'home'%}">All Courses</a>
                   <a class="dropdown-item" href="{% url 'courses:view_enrolled_course'%}">Uncompleted</a>
                   <a class="dropdown-item" href="{% url 'courses:view_enrolled_course'%}">Completed</a>
                   </div>
@@ -64,8 +64,8 @@
         </div>
         {% endif %}
         <a class="btn btn-primary logout w-100" href="{% url 'logout' %}">Log Out</a>
-      {% endif %}
       </div>
+      {% endif %}
     </div>
     <div class="content">
       {% block content %}

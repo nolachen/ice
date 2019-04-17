@@ -85,7 +85,7 @@ def load_components(request, course_id, module_id):
         'is_learner': is_learner(request.user),
         'components': components,
         'course_id': course_id,
-        'module_id': module_id,
+        'module': module,
         'quiz': quiz,
     })
 
