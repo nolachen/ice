@@ -1,12 +1,25 @@
-<h4>Components</h4>
+{% extends 'base.html' %}
 
-<ul class="nav nav-tabs" id="components">
-{% for component in components %}
-	<li role="presentation" id="{{ component.id }}">
-		<a data-toggle="tab" id="{{ component.id }}">{{ component.title }}</a>
-	</li>
-{% endfor %}
+{% block content %}
 
-{% if is_learner %}
-<p><a href="{% url 'courses:take_quiz' course_id=course_id module_id=module_id quiz_id=quiz.id %}">Quiz</a></p>
-{% endif %}
+<div>
+		<div id="components">
+			{% for component in components %}
+				<div id="{{ component.id }}">
+					<a id="{{ component.id }}">{{ component.title }}</a>
+					{% with child_component=component.get_child_component %}
+					<p>
+						{{ child_component.get_html_representation }}
+					</p>
+					{% endwith %}
+				</div>
+			{% endfor %}
+		</div>
+				
+		{% if is_learner %}
+		<p><a href="{% url 'courses:take_quiz' course_id=course_id module_id=module.id quiz_id=quiz.id %}">Quiz</a></p>
+		{% endif %}
+
+</div>
+
+{% endblock %}
