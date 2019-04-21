@@ -19,8 +19,8 @@
       <a class="navbar-brand" href="/">ICE</a>
   </nav>
   <div class="page">
+    {% if user.is_authenticated %}
     <div class="sidenav">
-      {% if user.is_authenticated %}
         <div class="sidenav-actions">
           {% if user|is_instructor %}
             <h3 class="text-center">Instructor Portal</h3>
@@ -36,25 +36,35 @@
                   </a>
                   <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
                     <a class="dropdown-item" href="#">All Courses</a>
-                    <a class="dropdown-item" href="{% url 'courses:module_list' ">All Modules</a>
-                    <a class="dropdown-item" href="{% url 'courses:all_components' %}">All Components</a>
                     </div>
                 </div>
-          {% else %}
+          {% elif user|is_learner %}
             <h3 class="text-center">Employee Portal</h3>
             <div class="dropdown">
               <a class="btn btn-secondary dropdown-toggle w-100" href="#" role="button" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                   Manage Courses
                 </a>
                 <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
-                  <a class="dropdown-item" href="{% url 'courses:view_enrolled_course'%}">All Courses</a>
+                  <a class="dropdown-item" href="{% url 'home'%}">All Courses</a>
                   <a class="dropdown-item" href="{% url 'courses:view_enrolled_course'%}">Uncompleted</a>
                   <a class="dropdown-item" href="{% url 'courses:view_enrolled_course'%}">Completed</a>
                   </div>
               </div>
-          {% endif %}
+          {% elif user|is_admin %}
+            <h3 class="text-center">Admin Portal</h3>
+            <div class="dropdown">
+              <a class="btn btn-secondary dropdown-toggle w-100" href="#" role="button" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                  Manage Users
+                </a>
+                <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
+                  <a class="dropdown-item" href="{% url 'invite'%}">Invite Instructor</a>
+                  <a class="dropdown-item" href="{% url 'restrict_access'%}">Restrict User</a>
+                  </div>
+              </div>
         </div>
+        {% endif %}
         <a class="btn btn-primary logout w-100" href="{% url 'logout' %}">Log Out</a>
+      </div>
       {% endif %}
     </div>
     <div class="content">
