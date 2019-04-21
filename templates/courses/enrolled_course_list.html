@@ -14,18 +14,30 @@
         {% if completed_enrollments %}
         <div class="row well">
           <div class="enrolled-course">
-            {% for enrollment in completed_enrollments %}
-                <div class="enrolled-course-completed">
-                  <a href="{% url 'courses:view_course' course_id=enrollment.course.id %}">{{ enrollment.course.name }}</a>
-                  <p>Completed Date: {{ enrollment.completed_date }}</p>
-                <br>
-            {% endfor %}
+            <div class="enrolled-course-completed">
+              <table style="width:120%">
+                <tr>
+                  <th>Course</th>
+                  <th>Date of Completetion</th>
+                  <th>CECU Value</th>
+                  <th>Cumulative CECU Value</th>
+                </tr>
+                <tr>
+                {% for enrollment, cecu in completed_enrollments %}
+                  <td><a href="{% url 'courses:view_course' course_id=enrollment.course.id %}">{{ enrollment.course.name }}</a></td>
+                  <td>{{ enrollment.completed_date }}</td>
+                  <td>{{ enrollment.course.cecu_value }}</td>
+                  <td>{{ cecu }}</td>
+                </tr>
+                {% endfor %}
+              </table>
+            <br>
           </div>
         </div>
       </div>
 
       {% else %}
-      <p>No completed courses available</p>
+      <p>No completed courses</p>
       {% endif %}
 
       {% if not_completed_course %}
@@ -43,7 +55,7 @@
       </div>
 
       {% else %}
-      <p>No in-progress course available</p>
+      <p>No in-progress courses</p>
       {% endif %}
 
     </div>

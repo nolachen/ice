@@ -241,6 +241,10 @@ def view_enrolled_course(request):
     learner = Learner.objects.get(learner=request.user)
     not_completed_course = []
     completed_enrollments = Enrollment.objects.filter(learner=learner, completed=True)
+    cumulative_cecu = [0]
+    for enrollment in completed_enrollments:
+        cumulative_cecu.append(enrollment.course.cecu_value + cumulative_cecu[-1])
+    completed_enrollments = zip(completed_enrollments, cumulative_cecu[1:])
     not_completed_enrollments = Enrollment.objects.filter(learner=learner, completed=False)
     for enrollment in not_completed_enrollments:
         not_completed_course.append(Course.objects.get(enrollment=enrollment))
