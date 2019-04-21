@@ -11,6 +11,10 @@ class Learner(models.Model):
         on_delete=models.CASCADE
     )
     staff_id = models.CharField(max_length=8, validators=[MinLengthValidator(8)], unique=True)
+    cecu_awarded = models.PositiveSmallIntegerField()
+
+    def award_cecu_credit(self, cecu_value):
+        self.cecu_awarded += cecu_value
 
 class Instructor(models.Model):
     instructor = models.OneToOneField(
@@ -29,7 +33,7 @@ class Course(models.Model):
     name = models.CharField(max_length=200)
     instructor = models.ForeignKey(Instructor, on_delete=models.CASCADE)
     #instructor_name = models.TextField(default='')
-    cecu_value = models.IntegerField()
+    cecu_value = models.PositiveSmallIntegerField()
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
     description = models.TextField(default='')
     deployed = models.BooleanField(default=False)

@@ -3,6 +3,8 @@ from django.http import HttpRequest, HttpResponseRedirect, HttpResponse, Http404
 from django.template import loader
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.urls import reverse
+from django.template.loader import render_to_string
+from django.core.mail import EmailMessage
 
 from courses.forms import CourseForm, ModuleForm, QuizForm, ImageUploadForm, TextComponentForm, SelectCategoryForm
 from courses.models import *
@@ -312,6 +314,18 @@ def take_quiz(request, course_id, module_id, quiz_id):
                     enrollment.completed = True
                     enrollment.completed_date = date.today()
                     enrollment.save()
+
+                    learner.award_cecu_credit(course.cecu_value)
+                    mail_subject = 'You are awarded with ' + str(course.cecu_value) + ' credits!'
+                    message = render_to_string('courses/award_cecu_value_email.html', {
+                        'user': request.user,
+                        'course': course,
+                    })
+                    to_email = request.user.email
+                    email = EmailMessage(
+                                mail_subject, message, to=[to_email]
+                    )
+                    email.send()
             else:
                 passed = False
             
