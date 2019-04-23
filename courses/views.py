@@ -200,6 +200,14 @@ def add_course(request):
         'form': form,
     })
 
+@user_passes_test(is_instructor)
+def deploy_course(request, course_id):
+    course = Course.objects.get(id=course_id)
+    course.deployed = True
+    course.save()
+    print(course_id)
+    return redirect('courses:view_course', course_id)
+
 def home(request):
     if request.POST:
         form = SelectCategoryForm(request.POST)

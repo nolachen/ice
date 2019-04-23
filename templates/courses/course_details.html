@@ -57,6 +57,15 @@
         <h4>Components</h4>
         <a href="{% url 'courses:all_components' course_id=course.id %}">View all components</a>
 
+        </br></br>
+
+        <h4>Status</h4>
+        {% if course.deployed %}
+          <p>Course Deployed</p>
+        {% else %}
+          <a href="{% url 'courses:deploy_course' course_id=course.id %}">Depoly</a>
+        {% endif %}
+        
       {% endif %}
 
       {% else %}
