@@ -47,7 +47,7 @@
         {% if is_learner %}
   
           {% if is_enrolled %}
-            <p>You have enrolled into this course! Enjoy!</p>
+            <!--<p>You have enrolled into this course! Enjoy!</p>-->
           {% else %}
             <a href="{% url 'courses:enroll_course' course_id=course.id %}">Enroll</a>
           {% endif %}

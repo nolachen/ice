@@ -46,8 +46,7 @@
                 </a>
                 <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
                   <a class="dropdown-item" href="{% url 'home'%}">All Courses</a>
-                  <a class="dropdown-item" href="{% url 'courses:view_enrolled_course'%}">Uncompleted</a>
-                  <a class="dropdown-item" href="{% url 'courses:view_enrolled_course'%}">Completed</a>
+                  <a class="dropdown-item" href="{% url 'courses:view_enrolled_course'%}">My Courses</a>
                   </div>
               </div>
           {% elif user|is_admin %}
