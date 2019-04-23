@@ -19,6 +19,14 @@
         <h4> Modules </h4>
         {% if user|is_instructor %}
         <a href="{% url 'courses:new_module' course_id=course.id %}">Create module</a>
+        </br>
+          {% if course.deployed %}
+          <p>This course is deployed, you are not allowed to reorder the modules. </p>
+          {% else %}
+          <a href="{% url 'courses:reorder_module' course_id=course.id %}">Reorder modules</a>
+          </br></br>
+          {% endif %}
+
         {% endif %}
         <div id="moduleContainer">
           <h5> Available Modules </h5>
@@ -61,7 +69,7 @@
 
         <h4>Status</h4>
         {% if course.deployed %}
-          <p>Course Deployed</p>
+          <p>Deployed</p>
         {% else %}
           <a href="{% url 'courses:deploy_course' course_id=course.id %}">Depoly</a>
         {% endif %}

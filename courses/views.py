@@ -1,5 +1,5 @@
 from django.shortcuts import render, get_object_or_404
-from django.http import HttpRequest, HttpResponseRedirect, HttpResponse, Http404
+from django.http import HttpRequest, HttpResponseRedirect, HttpResponse, Http404, JsonResponse
 from django.template import loader
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.urls import reverse
@@ -9,7 +9,7 @@ from django.core.mail import EmailMessage
 from courses.forms import CourseForm, ModuleForm, QuizForm, ImageUploadForm, TextComponentForm, SelectCategoryForm
 from courses.models import *
 
-import logging
+import logging, json
 logger = logging.getLogger(__name__)
 
 from django.template import loader
@@ -260,6 +260,41 @@ def view_enrolled_course(request):
         'completed_enrollments': completed_enrollments,
         'not_completed_course': not_completed_course,
     })
+
+@user_passes_test(is_instructor)
+def reorder_module(request, course_id):
+    course = Course.objects.get(id=course_id)
+    modules = course.modules.order_by('index').all()
+
+    if request.user != course.instructor.instructor:
+        raise Http404
+
+    return render(request, 'courses/module_reorder.html', {
+        'course': course,
+        'modules': modules,
+    })
+
+@user_passes_test(is_instructor)
+def reorder_module_save(request, course_id):
+    course = Course.objects.get(id=course_id)
+
+    if request.user != course.instructor.instructor:
+        raise Http404
+    
+    if request.method == "POST" and request.is_ajax():
+        new_module_order = request.POST.get('new_module_order')
+        new_module_order_list = json.loads(new_module_order)
+        new_module_order_list = list(map(int, new_module_order_list))
+        # start from 1 because django cannot store 0
+        counter = 1
+        for item_id in new_module_order_list:
+            module = Module.objects.get(id=item_id)
+            module.index = counter
+            module.save()
+            counter += 1
+        return JsonResponse(new_module_order, safe=False)
+
+    return redirect('courses:view_course', course_id)
 
 @user_passes_test(is_instructor)
 def edit_module(request, course_id, module_id=None):

@@ -21,7 +21,7 @@
     </form>
     <div class="course-grid">
       {% for course in courses %}
-        {% if course.deployed %}
+        {% if user|is_instructor or course.deployed %}
         <div class="card" style="width: 18rem;">
           <div class="card-body">
             <h5 class="card-title">{{ course.name }}</h5>
