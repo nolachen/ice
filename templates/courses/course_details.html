@@ -34,6 +34,9 @@
             {% for module in available_modules %}
               <li role="presentation" id="{{ module.id }}">
                 <a href="{% url 'courses:load_components' course_id=course.id module_id=module.id %}">{{ module.title }}</a>
+                {% if user|is_instructor %}
+                <p><a href="{% url 'courses:reorder_component' course_id=course.id module_id=module.id %}">Reorder components</a></p>
+                {% endif %}
               </li>
             {% endfor %}
           </ul>
@@ -64,7 +67,6 @@
 
         <h4>Components</h4>
         <a href="{% url 'courses:all_components' course_id=course.id %}">View all components</a>
-
         </br></br>
 
         <h4>Status</h4>

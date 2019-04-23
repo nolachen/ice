@@ -74,7 +74,7 @@ class Module(models.Model):
             self.index = self.course.modules.count()
         super(Module, self).save(*args, **kwargs)
     
-    def getComponents(self):
+    def get_components(self):
         return Component.objects.filter(module=self)
 
 class Quiz(models.Model):

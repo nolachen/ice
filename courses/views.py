@@ -82,7 +82,7 @@ def enroll_course(request, course_id):
 
 def load_components(request, course_id, module_id):  
     module = Module.objects.get(id=module_id)
-    components = module.getComponents().order_by("index")
+    components = module.get_components().order_by("index")
     quiz = Quiz.objects.get(module_id=module_id)
     return render(request, 'courses/component_list.html', {
         'is_learner': is_learner(request.user),
@@ -293,6 +293,43 @@ def reorder_module_save(request, course_id):
             module.save()
             counter += 1
         return JsonResponse(new_module_order, safe=False)
+
+    return redirect('courses:view_course', course_id)
+
+@user_passes_test(is_instructor)
+def reorder_component(request, course_id, module_id):
+    course = Course.objects.get(id=course_id)
+    module = Module.objects.get(id=module_id)
+    components = module.get_components()
+
+    if request.user != course.instructor.instructor:
+        raise Http404
+
+    return render(request, 'courses/component_reorder.html', {
+        'course': course,
+        'module': module,
+        'components': components,
+    })
+
+@user_passes_test(is_instructor)
+def reorder_component_save(request, course_id, module_id):
+    course = Course.objects.get(id=course_id)
+
+    if request.user != course.instructor.instructor:
+        raise Http404
+    
+    if request.method == "POST" and request.is_ajax():
+        new_comp_order = request.POST.get('new_comp_order')
+        new_comp_order_list = json.loads(new_comp_order)
+        new_comp_order_list = list(map(int, new_comp_order_list))
+        # start from 1 because django cannot store 0
+        counter = 1
+        for item_id in new_comp_order_list:
+            component = Component.objects.get(id=item_id)
+            component.index = counter
+            component.save()
+            counter += 1
+        return JsonResponse(new_comp_order, safe=False)
 
     return redirect('courses:view_course', course_id)
 
