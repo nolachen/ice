@@ -3,7 +3,7 @@
 {% block content %}
 <h1>{{ course.name }} > {{ action_word }} Module</h1>
 
-<form action="{% url 'new_module' course_id=course.id %}" method="post">
+<form action="{% url 'courses:new_module' course_id=course.id %}" method="post">
     {% csrf_token %}
     {{ form.as_p }}
     <input type="submit" value="Submit">
