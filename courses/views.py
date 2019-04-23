@@ -268,7 +268,12 @@ def edit_module(request, course_id, module_id=None):
             url = reverse("courses:module_list", kwargs={'course_id': course_id})
             return HttpResponseRedirect(url)
         else:
-            raise Http404
+            return render(request, 'courses/module_edit.html', {
+                'course': course,
+                # 'module': module,
+                'action_word': 'Add',
+                'form': form
+            })
 
     # if module_id:
     #     module = Module.objects.get(id=module_id)
