@@ -43,12 +43,12 @@
             <div class="dropdown">
               <a class="btn btn-secondary dropdown-toggle w-100" href="#" role="button" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                   Manage Courses
-                </a>
+              </a>
                 <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
                   <a class="dropdown-item" href="{% url 'home'%}">All Courses</a>
                   <a class="dropdown-item" href="{% url 'courses:view_enrolled_course'%}">Uncompleted</a>
                   <a class="dropdown-item" href="{% url 'courses:view_enrolled_course'%}">Completed</a>
-                  </div>
+                </div>
               </div>
           {% elif user|is_admin %}
             <h3 class="text-center">Admin Portal</h3>

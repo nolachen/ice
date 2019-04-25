@@ -2,10 +2,11 @@
 
 {% block content %}
 
-<div>
+<div class="card bg-light mb-3">
 		<div id="components">
+		<h3 class="card-header">Module Components</h3>
 			{% for component in components %}
-				<div id="{{ component.id }}">
+				<div class="card-body" id="{{ component.id }}">
 					<a id="{{ component.id }}">{{ component.title }}</a>
 					{% with child_component=component.get_child_component %}
 					<p>
@@ -15,11 +16,11 @@
 				</div>
 			{% endfor %}
 		</div>
-				
-		{% if is_learner %}
-		<p><a href="{% url 'courses:take_quiz' course_id=course_id module_id=module.id quiz_id=quiz.id %}">Quiz</a></p>
-		{% endif %}
 
 </div>
+
+{% if is_learner %}
+	<p><a class="btn btn-primary" href="{% url 'courses:take_quiz' course_id=course_id module_id=module.id quiz_id=quiz.id %}">Take Quiz</a></p>
+{% endif %}
 
 {% endblock %}

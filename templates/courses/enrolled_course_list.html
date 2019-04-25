@@ -4,48 +4,47 @@
 {% block title %}All Enrolled Courses{% endblock %}
 
 {% block content %}
-<div class="enrolled-courses-container" style="padding-top:10px">
-  <h3>All Enrolled Courses</h3>
-  <div class="row well">
-    <div class="col-md-12">
-
-      <div>
-        <h4>Completed Courses</h4>
+<h3>My Enrolled Courses</h3>
+<hr>
+<div class="enrolled-courses-container">
+      <div class="completed-courses-card card bg-light">
+        <h4 class="card-header">Completed</h4>
         {% if completed_enrollments %}
-        <div class="row well">
-          <div class="enrolled-course">
+        <div class="card-body">
             {% for enrollment in completed_enrollments %}
                 <div class="enrolled-course-completed">
-                  <a href="{% url 'courses:view_course' course_id=enrollment.course.id %}">{{ enrollment.course.name }}</a>
+                  <a class="btn btn-info mb-2" href="{% url 'courses:view_course' course_id=enrollment.course.id %}">{{ enrollment.course.name }}</a>
                   <p>Completed Date: {{ enrollment.completed_date }}</p>
+                  <hr>
                 <br>
+                </div>
             {% endfor %}
-          </div>
         </div>
       </div>
-
       {% else %}
-      <p>No completed courses available</p>
+      <div class="card-body">
+        <p>No completed courses available</p>
+      </div>
+      </div>
       {% endif %}
 
       {% if not_completed_course %}
-      <div>
-        <h4>Incomplete Courses</h4>
-        <div class="row well">
-          <ul class="enrolled-course">
+      <div class="incomplete-course-card card bg-light">
+        <h4 class="card-header">Incomplete</h4>
+        <div class="card-body">
+          <ul>
             {% for course in not_completed_course %}
-              <li class="enrolled-course-completed">
-                  <a href="{% url 'courses:view_course' course_id=course.id %}">{{ course.name }}</a>
-                <br>
+              <li class="enrolled-course-incomplete">
+                  <a class="btn btn-info" href="{% url 'courses:view_course' course_id=course.id %}">{{ course.name }}</a>
+                <hr>
               </li>
           {% endfor %}
           </ul>
+        </div>
       </div>
-
       {% else %}
       <p>No in-progress course available</p>
       {% endif %}
-
     </div>
   </div>
 </div>
