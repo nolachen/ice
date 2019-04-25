@@ -8,6 +8,7 @@ urlpatterns = [
     path('<int:course_id>/components', views.all_components, name="all_components"),
     path('<int:course_id>/component/<int:component_id>/edit', views.new_component, name="edit_component"),
     path('<int:course_id>/component/new/<str:type>', views.new_component, name="new_component"),
+    path('<int:course_id>/modules/<int:module_id>/components/new/<str:type>', views.new_component, name="new_component"),
     path('<int:course_id>/modules', views.module_list, name="module_list"),
     path('<int:course_id>/modules/<int:module_id>/components', views.load_components, name="load_components"),
     path('<int:course_id>/modules/<int:module_id>/quiz/<int:quiz_id>/', views.take_quiz, name="take_quiz"),
