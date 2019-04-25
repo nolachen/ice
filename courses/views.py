@@ -90,8 +90,7 @@ def load_components(request, course_id, module_id):
         form = AddExistingComponentsForm(request.POST, course_id=course_id)
         if form.is_valid():
             for component in form.cleaned_data['components']:
-                component.module = module
-                component.save()
+                module.add_component(component)
 
     add_components_form = AddExistingComponentsForm(course_id=course_id)
     context = {
@@ -155,7 +154,6 @@ def new_component(request, course_id, module_id=None, type=None, component_id=No
     ) 
 
     if request.method == 'POST':
-        print('module id?', module_id)
         if component_type == Component.IMAGE:
             form = ImageUploadForm(request.POST, request.FILES, course_id=course_id, module_id=module_id, instance=component)
         elif component_type == Component.TEXT:
@@ -166,21 +164,13 @@ def new_component(request, course_id, module_id=None, type=None, component_id=No
         if form.is_valid():
             new_component = form.save(commit=False)
             new_component.course = course
-            if module:
-                new_component.module = module
             new_component.component_type = component_type
             new_component.save()
+
+            if module:
+                module.add_component(new_component)
             
             return HttpResponseRedirect(component_url)
-        # else:
-        #     print(form.errors)
-        #     print(form.non_field_errors)
-        #     # Re-render the form, so the errors will show
-        #     return render(request, 'courses/component_edit.html', { 
-        #         'form': form,
-        #         'course': course,
-        #         'module': module
-        #     }) 
 
     else:
         if component_type == Component.IMAGE:
@@ -296,13 +286,6 @@ def edit_module(request, course_id, module_id=None):
             form.save()
             url = reverse("courses:module_list", kwargs={'course_id': course_id})
             return HttpResponseRedirect(url)
-        # else:
-        #     return render(request, 'courses/module_edit.html', {
-        #         'course': course,
-        #         # 'module': module,
-        #         'action_word': 'Add',
-        #         'form': form
-        #     })
 
     # if module_id:
     #     module = Module.objects.get(id=module_id)

@@ -69,7 +69,6 @@ class ComponentForm(BaseForm):
             raise RuntimeError('Need course_id for ComponentForm')
         super(ComponentForm, self).__init__(*args, **kwargs)        
         if module_id:
-            print('yikes this is wrong')
             del self.fields['module']
         else:
             self.fields['module'].queryset = Module.objects.filter(course=course_id)
@@ -79,10 +78,7 @@ class ComponentForm(BaseForm):
     class Meta:
         model = Component
         fields = ('module', 'title')
-        # help_texts = {
-        #     'module': 'Optional'
-        # }
-
+        
 class ImageUploadForm(ComponentForm):
     def __init__(self, *args, **kwargs):
         super(ImageUploadForm, self).__init__(*args, **kwargs)

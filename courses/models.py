@@ -79,6 +79,8 @@ class Module(models.Model):
     
     def add_component(self, component, index=None):
         component.module = self
+        if index:
+            component.index = index
         component.save()
 
 class Quiz(models.Model):
@@ -158,9 +160,12 @@ class Component(models.Model):
 
     def save(self, *args, **kwargs):
         # Only set an index if the component belongs to a module
-        if not self.index and self.module:
+        if self.index is None and self.module:
             # Default the index to the last one in the sequence
             self.index = Component.objects.filter(module=self.module).count()
+        # If we remove a component from its module, reset the index
+        if self.index is not None and not self.module:
+            self.index = None
         super(Component, self).save(*args, **kwargs)
 
     def get_child_component(self):
