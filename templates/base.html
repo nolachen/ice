@@ -19,9 +19,10 @@
   <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
       <a class="navbar-brand" href="/">ICE</a>
   </nav>
-  <div class="page">
+  <div class="page container-fluid">
+    <div class="row">
     {% if user.is_authenticated %}
-    <div class="sidenav">
+    <div class="sidenav col-sm-2">
         <div class="sidenav-actions">
           {% if user|is_instructor %}
             <h3 class="text-center">Instructor Portal</h3>
@@ -62,15 +63,15 @@
                   <a class="dropdown-item" href="{% url 'restrict_access'%}">Restrict User</a>
                   </div>
               </div>
-        </div>
         {% endif %}
+        </div>
         <a class="btn btn-primary logout w-100" href="{% url 'logout' %}">Log Out</a>
       </div>
       {% endif %}
-    </div>
-    <div class="content">
+    <div class="content col-sm-10">
       {% block content %}
       {% endblock %}
+    </div>
     </div>
   </div>
 </body>
