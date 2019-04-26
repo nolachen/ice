@@ -30,6 +30,7 @@ def view_course(request, course_id):
     is_enrolled = False
     course = Course.objects.get(id=course_id)
     instructor = User.objects.get(id=course.instructor.instructor_id)
+    autobiography = Instructor.objects.get(instructor=instructor).autobiography
     modules = course.modules.order_by('index').all()
     available_modules = []
     locked_modules = []
@@ -66,6 +67,7 @@ def view_course(request, course_id):
         'is_enrolled': is_enrolled,
         'available_modules': available_modules,
         'locked_modules': locked_modules,
+        'autobiography': autobiography,
     })
 
 @user_passes_test(is_learner)

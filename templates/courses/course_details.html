@@ -11,7 +11,9 @@
       <div class="card-body">
         <p> Name: {{ course.name }}</p>
         <p> Category: {{ course.category }}</p>
+        <p> CECU Value: {{ course.cecu_value }}</p>
         <p> Instructor: {{ instructor.first_name }} {{ instructor.last_name }}</p>
+        <p> Instructor Introduction: {{ autobiography }}</p>
         <p> Description: {{ course.description }}</p>
         {% if user|is_instructor %}
           {% if course.is_deployed %}
