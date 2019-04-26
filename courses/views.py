@@ -256,7 +256,7 @@ def module_list(request, course_id):
 def view_enrolled_course(request):
     learner = Learner.objects.get(learner=request.user)
     not_completed_course = []
-    completed_enrollments = Enrollment.objects.filter(learner=learner, completed=True)
+    completed_enrollments = Enrollment.objects.filter(learner=learner, completed=True).order_by('completed_date')
     cumulative_cecu = [0]
     for enrollment in completed_enrollments:
         cumulative_cecu.append(enrollment.course.cecu_value + cumulative_cecu[-1])
