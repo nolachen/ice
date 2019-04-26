@@ -2,6 +2,7 @@ from django import forms
 from courses.models import Course, Module, Component, Category, Question, Answer, Choice, Quiz, ImageComponent, TextComponent
 import logging
 logger = logging.getLogger(__name__)
+from random import shuffle
 
 # Base form to add Bootstrap 'form-control' class to every input
 class BaseForm(forms.ModelForm):
@@ -49,9 +50,13 @@ class ModuleForm(forms.ModelForm):
 class QuizForm(forms.Form):
     def __init__(self, quiz_id, *args, **kwargs):
         quiz = Quiz.objects.get(id=quiz_id)
-        questions = quiz.question_set.all()
+        questions = quiz.question_set.all().order_by('?')
         super(QuizForm, self).__init__(*args, **kwargs)
+        i = 0
         for question in questions:
+            if i == quiz.num_questions:
+                break
+            i = i + 1
             field_name = question.id
             choices = []
             index = 0
