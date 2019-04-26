@@ -40,39 +40,40 @@ def signup(request):
             print(json_data['first_name'])
 
             user = form.save(commit=False)
-            user.is_active = False
-            user.is_staff = True
-            user.save()
-            user.email = json_data['email']
-            user.first_name = json_data['first_name']
-            user.last_name = json_data['last_name']
-            # Here I have to set something for the username, otherwise it will be blank
-            # when another user sign up for the site, there will be another blank username,
-            # hence the UNIQUE constraint will be failed
             user.username = json_data['email']
-            try:
+            if User.objects.filter(username=user.username).exists():
+                print('test')
+                return render(request, 'registration/signup_confirm.html', {
+                    'message': 'You have already signed up for the ICE System, please check your mail box for the activation email!'
+                })
+            else:
+                user.is_active = False
+                user.is_staff = True
+                user.email = json_data['email']
+                user.first_name = json_data['first_name']
+                user.last_name = json_data['last_name']
                 user.save()
-            except IntegrityError as e:
-                return HttpResponse('You have already signed up for the ICE System, please check your mail box for the activation email!')
 
-            learner = Learner(learner_id=user.id)
-            learner.staff_id = json_data['id']
-            learner.save()
+                learner = Learner(learner_id=user.id)
+                learner.staff_id = json_data['id']
+                learner.save()
 
-            current_site = get_current_site(request)
-            mail_subject = 'Activate your account.'
-            message = render_to_string('registration/acc_active_email.html', {
-                'user': user,
-                'domain': current_site.domain,
-                'uid': urlsafe_base64_encode(force_bytes(user.pk)).decode(),
-                'token': account_activation_token.make_token(user),
+                current_site = get_current_site(request)
+                mail_subject = 'Activate your account.'
+                message = render_to_string('registration/acc_active_email.html', {
+                    'user': user,
+                    'domain': current_site.domain,
+                    'uid': urlsafe_base64_encode(force_bytes(user.pk)).decode(),
+                    'token': account_activation_token.make_token(user),
+                })
+                to_email = json_data['email']
+                email = EmailMessage(
+                            mail_subject, message, to=[to_email]
+                )
+                email.send()
+            return render(request, 'registration/signup_confirm.html', {
+                'message': 'Please confirm your email address to complete the registration',
             })
-            to_email = json_data['email']
-            email = EmailMessage(
-                        mail_subject, message, to=[to_email]
-            )
-            email.send()
-            return HttpResponse('Please confirm your email address to complete the registration')
         else:
             raise Http404
     else:
