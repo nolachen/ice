@@ -6,7 +6,7 @@
   <h3><a href="{% url 'courses:view_course' course_id=course.id %}">{{ course.name }}</a> > {{ module.title }} > Components</h3>
 
   {% if is_instructor %}
-    {% if course.deployed %}
+    {% if course.is_deployed %}
       <p>This course is deployed, you are not allowed to add or reorder components.</p>
     {% else %}
     <div class="reorder-components">

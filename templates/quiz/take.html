@@ -2,7 +2,7 @@
 
 {% block content %}
 <form action="" method="POST">
-    {% if passed == True %}
+    {% if is_passed == True %}
     <p>You have already passed the quiz.</p>
     {% else %}
     <h1>{{ quiz.title }}</h1>
