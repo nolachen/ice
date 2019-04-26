@@ -21,7 +21,7 @@ class CourseForm(forms.ModelForm):
         model = Course
         fields = ['name', 'cecu_value', 'description', 'category']
 
-class ModuleForm(forms.ModelForm):
+class ModuleForm(BaseForm):
     class Meta:
         model = Module
         fields = ['title']
@@ -42,7 +42,7 @@ class ModuleForm(forms.ModelForm):
         #     queryset=course.imagecomponents.filter(module__isnull=True)
         # )
         self.fields['quiz'] = forms.ModelChoiceField(
-            required=False,
+            required=True,
             queryset=course.quizzes.filter(module__isnull=True)
         )
         max = Module.objects.filter(course_id=course_id).count()
@@ -50,18 +50,20 @@ class ModuleForm(forms.ModelForm):
 
 class QuizForm(forms.Form):
     def __init__(self, quiz_id, *args, **kwargs):
-        quiz = Quiz.objects.get(id=quiz_id)
-        questions = quiz.question_set.all()
+        # If we passed in questions use those bc we need to preserve them across the request cycle
+        questions = kwargs.pop('questions', None)
         super(QuizForm, self).__init__(*args, **kwargs)
+
+        quiz = Quiz.objects.get(id=quiz_id)
+
+        if not questions:
+            questions = quiz.question_set.all().order_by('?')[:quiz.num_questions]
+
         for question in questions:
-            field_name = question.id
             choices = []
-            index = 0
             for choice in Choice.objects.filter(question_id=question.id):
                 choices.append((choice.id, choice.choice_text))
-                index = index + 1
-            self.fields[str(question.id)] = forms.ChoiceField(label=question.question_text, required=True, 
-                                        choices=choices, widget=forms.RadioSelect)
+            self.fields[str(question.id)] = forms.ChoiceField(label=question.question_text, required=False, choices=choices, widget=forms.RadioSelect(attrs={'id': question.id}))
 
 class ComponentForm(BaseForm):
     def __init__(self, *args, **kwargs):
@@ -80,7 +82,7 @@ class ComponentForm(BaseForm):
     class Meta:
         model = Component
         fields = ('module', 'title')
-        
+
 class ImageUploadForm(ComponentForm):
     def __init__(self, *args, **kwargs):
         super(ImageUploadForm, self).__init__(*args, **kwargs)

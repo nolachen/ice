@@ -11,7 +11,7 @@ from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.decorators import login_required, user_passes_test
 
 from courses.forms import CourseForm, ModuleForm, QuizForm, ImageUploadForm, TextComponentForm, SelectCategoryForm, AddExistingComponentsForm
-from courses.models import Instructor, Learner, Course, Module, Quiz, Answer, QuizResult, Component, Enrollment
+from courses.models import Instructor, Learner, Course, Module, Quiz, Answer, QuizResult, Component, Enrollment, Question
 
 from datetime import date
 
@@ -30,6 +30,7 @@ def view_course(request, course_id):
     is_enrolled = False
     course = Course.objects.get(id=course_id)
     instructor = User.objects.get(id=course.instructor.instructor_id)
+    autobiography = Instructor.objects.get(instructor=instructor).autobiography
     modules = course.modules.order_by('index').all()
     available_modules = []
     locked_modules = []
@@ -66,6 +67,7 @@ def view_course(request, course_id):
         'is_enrolled': is_enrolled,
         'available_modules': available_modules,
         'locked_modules': locked_modules,
+        'autobiography': autobiography,
     })
 
 @user_passes_test(is_learner)
@@ -248,7 +250,7 @@ def home(request):
         'form': form,
     })
 
-# @login_required
+@login_required
 def module_list(request, course_id):
     course = Course.objects.get(id=course_id)
     modules = course.modules.order_by('index').all()
@@ -266,15 +268,18 @@ def module_list(request, course_id):
 def view_enrolled_course(request):
     learner = Learner.objects.get(learner=request.user)
     not_completed_course = []
+    completed_course = []
     completed_enrollments = Enrollment.objects.filter(learner=learner, is_completed=True).order_by('completed_date')
     cumulative_cecu = [0]
     for enrollment in completed_enrollments:
+        completed_course.append(Course.objects.get(enrollment=enrollment))
         cumulative_cecu.append(enrollment.course.cecu_value + cumulative_cecu[-1])
     completed_enrollments = zip(completed_enrollments, cumulative_cecu[1:])
     not_completed_enrollments = Enrollment.objects.filter(learner=learner, is_completed=False)
     for enrollment in not_completed_enrollments:
         not_completed_course.append(Course.objects.get(enrollment=enrollment))
     return render(request, 'courses/enrolled_course_list.html', {
+        'completed_course': completed_course,
         'completed_enrollments': completed_enrollments,
         'not_completed_course': not_completed_course,
     })
@@ -354,8 +359,7 @@ def reorder_component_save(request, course_id, module_id):
 @user_passes_test(is_instructor)
 def edit_module(request, course_id, module_id=None):
     course = get_object_or_404(Course, id=course_id)
-    if module_id:
-        module = get_object_or_404(Module, id=module_id)
+    module = get_object_or_404(Module, id=module_id) if module_id else None
 
     # You can only access this page if you own the course
     if request.user != course.instructor.instructor:
@@ -366,7 +370,6 @@ def edit_module(request, course_id, module_id=None):
         form = ModuleForm(request.POST, course_id=course_id)
         if form.is_valid():
             modules = Module.objects.filter(course_id=course_id).order_by("index")
-            # FIXME 
             module = form.save(commit=False)
 
             counter = form.cleaned_data['index to insert']
@@ -377,12 +380,12 @@ def edit_module(request, course_id, module_id=None):
 
             module.course = course
             module.index = counter
+
+            quiz = form.cleaned_data.get('quiz')
             module.save()
+            module.add_quiz(quiz)
             url = reverse("courses:module_list", kwargs={'course_id': course_id})
             return HttpResponseRedirect(url)
-
-    # if module_id:
-    #     module = Module.objects.get(id=module_id)
 
     # GET method
     else:
@@ -390,8 +393,7 @@ def edit_module(request, course_id, module_id=None):
 
     return render(request, 'courses/module_edit.html', {
         'course': course,
-        # 'module': module,
-        'action_word': 'Add',
+        'module': module,
         'form': form
     })
 
@@ -406,15 +408,36 @@ def take_quiz(request, course_id, module_id, quiz_id):
             "is_passed": True,
         })
 
-    questions = quiz.question_set.all()
     if request.method == "POST":
-        form = QuizForm(quiz_id, request.POST)
+        form = QuizForm(quiz_id, request.POST, questions=Question.objects.filter(id__in=request.POST.getlist('question')))
         if form.is_valid():
-            is_passed = False
+            print(form.cleaned_data)
             num_of_correct = 0
+            questions = quiz.question_set.all()
+            """
+            Here I iterrate through all the questions, try to see if the form contains the question,
+            if yes, then it should be
+            
             for question in questions:
+                try:
+                    answer_id = int(form.cleaned_data[str(question.id)])
+                except:
+                    continue
+                if answer_id == (Answer.objects.get(question_id=question.id).correct_answer_id):
+                    num_of_correct += 1
+            """
+            """
+            The below for loop for score calculation is working if the questions 
+            are not sliced (simply let questions = quiz.question_set.all() in forms.py)
+            """
+            for question in questions:
+                try:
+                    answer_id = int(form.cleaned_data[str(question.id)])
+                except:
+                    continue
                 if ( int(form.cleaned_data[str(question.id)]) == (Answer.objects.get(question_id=question.id).correct_answer_id)):
                     num_of_correct += 1
+            
             if (num_of_correct >= quiz.passing_score * quiz.num_questions / 100):
                 is_passed = True
                 # Check if the module is the last module
