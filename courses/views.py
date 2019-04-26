@@ -84,12 +84,20 @@ def load_components(request, course_id, module_id):
     if request.POST and is_instructor(request.user):
         form = AddExistingComponentsForm(request.POST, course_id=course_id, module_id=module_id)
         if form.is_valid():
-            index = form.cleaned_data['index']
+            counter = form.cleaned_data['index to insert']
+            orginal_component = components
+            num_new_components = form.cleaned_data['components'].count()
+            for component in orginal_component:
+                if component.index >= form.cleaned_data['index to insert']:
+                    component.index += num_new_components
+                    component.save()
             for component in form.cleaned_data['components']:
-                module.add_component(component, index)
-                index = index + 1
-
-    add_components_form = AddExistingComponentsForm(course_id=course_id, module_id = module_id)
+                component.module = module
+                component.index = counter
+                counter += 1
+                component.save()
+            
+    add_components_form = AddExistingComponentsForm(course_id=course_id, module_id=module_id)
     context = {
         'is_learner': is_learner(request.user),
         'is_instructor': is_instructor(request.user),
