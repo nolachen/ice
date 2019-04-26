@@ -7,7 +7,7 @@
 
   {% if is_instructor %}
     {% if course.deployed %}
-      <p>This course is deployed, you are not allowed to add components.</p>
+      <p>This course is deployed, you are not allowed to add or reorder components.</p>
     {% else %}
     <div class="reorder-components">
       <a class="btn btn-primary" href="{% url 'courses:reorder_component' course_id=course.id module_id=module.id %}">Reorder components</a>

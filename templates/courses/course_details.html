@@ -13,6 +13,13 @@
         <p> Category: {{ course.category }}</p>
         <p> Instructor: {{ instructor.first_name }} {{ instructor.last_name }}</p>
         <p> Description: {{ course.description }}</p>
+        {% if user|is_instructor %}
+          {% if course.deployed %}
+            <p> Status: Deployed </p>
+          {% else %}
+            <p> Status: Not Deployed </p>
+          {% endif %}
+        {% endif %}
         <hr>
         {% if is_learner %}
           {% if is_enrolled %}
@@ -31,8 +38,12 @@
         <h4 class="card-header">Modules</h4>
         <div class="card-body">
           {% if user|is_instructor %}
-            <a class="btn btn-dark" href="{% url 'courses:new_module' course_id=course.id %}">Create module</a>
-            <a class="btn btn-dark" href="{% url 'courses:reorder_module' course_id=course.id %}">Reorder modules</a>
+            {% if course.deployed %}
+              <p> This course is deployed, you are not allowed to add or reorder components. </p>
+            {% else %}
+              <a class="btn btn-dark" href="{% url 'courses:new_module' course_id=course.id %}">Create module</a>
+              <a class="btn btn-dark" href="{% url 'courses:reorder_module' course_id=course.id %}">Reorder modules</a>
+            {% endif %}    
             <hr>
           {% endif %}
           <div id="moduleContainer">
