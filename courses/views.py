@@ -86,11 +86,11 @@ def load_components(request, course_id, module_id):
     if request.POST and is_instructor(request.user):
         form = AddExistingComponentsForm(request.POST, course_id=course_id, module_id=module_id)
         if form.is_valid():
-            counter = form.cleaned_data['index to insert']
+            counter = form.cleaned_data['index']
             orginal_component = components
             num_new_components = form.cleaned_data['components'].count()
             for component in orginal_component:
-                if component.index >= form.cleaned_data['index to insert']:
+                if component.index >= form.cleaned_data['index']:
                     component.index += num_new_components
                     component.save()
             for component in form.cleaned_data['components']:
@@ -98,6 +98,8 @@ def load_components(request, course_id, module_id):
                 component.index = counter
                 counter += 1
                 component.save()
+            url = reverse("courses:load_components", kwargs={'course_id': course_id, 'module_id': module_id })
+            return HttpResponseRedirect(url)
             
     add_components_form = AddExistingComponentsForm(course_id=course_id, module_id=module_id)
     context = {
@@ -155,7 +157,7 @@ def new_component(request, course_id, module_id=None, type=None, component_id=No
         component_type = type_to_component_type[type]
 
     component_url = (
-        reverse("courses:load_components", kwargs={'course_id': course_id, 'module_id': module_id })
+        reverse("courses:load_components", kwargs={'course_id': course_id, 'module_id': module_id})
         if module_id
         else reverse("courses:all_components", kwargs={'course_id': course_id})
     ) 
@@ -372,9 +374,9 @@ def edit_module(request, course_id, module_id=None):
             modules = Module.objects.filter(course_id=course_id).order_by("index")
             module = form.save(commit=False)
 
-            counter = form.cleaned_data['index to insert']
+            counter = form.cleaned_data['index']
             for moduleIndex in modules:
-                if moduleIndex.index >= form.cleaned_data['index to insert']:
+                if moduleIndex.index >= form.cleaned_data['index']:
                     moduleIndex.index += 1
                     moduleIndex.save()
 

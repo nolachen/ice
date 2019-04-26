@@ -126,4 +126,4 @@ class AddExistingComponentsForm(forms.Form):
         )
 
         max = Component.objects.filter(module_id=module_id).count()
-        self.fields['index to insert'] = forms.IntegerField(min_value=1, max_value=max, widget=forms.NumberInput())
+        self.fields['index'] = forms.IntegerField(min_value=0, max_value=max, widget=forms.NumberInput())
