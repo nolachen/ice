@@ -46,6 +46,8 @@ class ModuleForm(forms.ModelForm):
             queryset=course.quizzes.filter(module__isnull=True)
         )
 
+        self.fields['index to insert'] = forms.IntegerField(min_value=1, widget=forms.NumberInput())
+
 class QuizForm(forms.Form):
     def __init__(self, quiz_id, *args, **kwargs):
         quiz = Quiz.objects.get(id=quiz_id)

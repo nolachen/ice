@@ -365,10 +365,19 @@ def edit_module(request, course_id, module_id=None):
     if request.method == 'POST':
         form = ModuleForm(request.POST, course_id=course_id)
         if form.is_valid():
+            modules = Module.objects.filter(course_id=course_id).order_by("index")
             # FIXME 
-            form = form.save(commit=False)
-            form.course = course
-            form.save()
+            module = form.save(commit=False)
+
+            counter = form.cleaned_data['index to insert']
+            for moduleIndex in modules:
+                if moduleIndex.index >= form.cleaned_data['index to insert']:
+                    moduleIndex.index += 1
+                    moduleIndex.save()
+
+            module.course = course
+            module.index = counter
+            module.save()
             url = reverse("courses:module_list", kwargs={'course_id': course_id})
             return HttpResponseRedirect(url)
 
