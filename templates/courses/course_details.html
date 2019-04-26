@@ -18,11 +18,11 @@
         
         <h4> Modules </h4>
         {% if user|is_instructor %}
-        <a href="{% url 'courses:new_module' course_id=course.id %}">Create module</a>
-        </br>
           {% if course.deployed %}
-          <p>This course is deployed, you are not allowed to reorder the modules. </p>
+          <p>This course is deployed, you are not allowed to make further changes.</p>
           {% else %}
+          <a href="{% url 'courses:new_module' course_id=course.id %}">Create module</a>
+          </br>
           <a href="{% url 'courses:reorder_module' course_id=course.id %}">Reorder modules</a>
           </br></br>
           {% endif %}
@@ -35,7 +35,10 @@
               <li role="presentation" id="{{ module.id }}">
                 <a href="{% url 'courses:load_components' course_id=course.id module_id=module.id %}">{{ module.title }}</a>
                 {% if user|is_instructor %}
-                <p><a href="{% url 'courses:reorder_component' course_id=course.id module_id=module.id %}">Reorder components</a></p>
+                  {% if course.deployed %}
+                  {% else %}
+                  <p><a href="{% url 'courses:reorder_component' course_id=course.id module_id=module.id %}">Reorder components</a></p>
+                  {% endif %}
                 {% endif %}
               </li>
             {% endfor %}
@@ -43,6 +46,8 @@
   
           <br>
           
+          {% if user|is_instructor %}
+          {% else %}
           <h5> Locked Modules </h5>
           <ul id="locked_modules">
             {% for module in locked_modules %}
@@ -50,6 +55,7 @@
                 <p>{{ module.title }}</p>
               </li>
             {% endfor %}
+          {% endif %}
           </ul>
         </div>
   
@@ -73,7 +79,7 @@
         {% if course.deployed %}
           <p>Deployed</p>
         {% else %}
-          <a href="{% url 'courses:deploy_course' course_id=course.id %}">Depoly</a>
+          <p>Not deployed</p>
         {% endif %}
         
       {% endif %}
