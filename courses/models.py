@@ -11,7 +11,7 @@ class Learner(models.Model):
         on_delete=models.CASCADE
     )
     staff_id = models.CharField(max_length=8, validators=[MinLengthValidator(8)], unique=True)
-    cecu_awarded = models.PositiveSmallIntegerField()
+    cecu_awarded = models.PositiveSmallIntegerField(default=0)
 
     def award_cecu_credit(self, cecu_value):
         self.cecu_awarded += cecu_value
