@@ -32,6 +32,7 @@
         <div class="card-body">
           {% if user|is_instructor %}
             <a class="btn btn-dark" href="{% url 'courses:new_module' course_id=course.id %}">Create module</a>
+            <a class="btn btn-dark" href="{% url 'courses:reorder_module' course_id=course.id %}">Reorder modules</a>
             <hr>
           {% endif %}
           <div id="moduleContainer">
