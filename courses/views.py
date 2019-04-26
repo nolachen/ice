@@ -387,15 +387,32 @@ def take_quiz(request, course_id, module_id, quiz_id):
             "is_passed": True,
         })
 
-    questions = quiz.question_set.all()
     if request.method == "POST":
         form = QuizForm(quiz_id, request.POST)
+        print(form.errors)
         if form.is_valid():
-            is_passed = False
+            print(form.cleaned_data)
             num_of_correct = 0
+            questions = quiz.question_set.all()
+            """
+            Here I iterrate through all the questions, try to see if the form contains the question,
+            if yes, then it should be
+            """
+            for question in questions:
+                try:
+                    answer_id = int(form.cleaned_data[str(question.id)])
+                except:
+                    continue
+                if answer_id == (Answer.objects.get(question_id=question.id).correct_answer_id):
+                    num_of_correct += 1
+            """
+            The below for loop for score calculation is working if the questions 
+            are not sliced (simply let questions = quiz.question_set.all() in forms.py)
+
             for question in questions:
                 if ( int(form.cleaned_data[str(question.id)]) == (Answer.objects.get(question_id=question.id).correct_answer_id)):
                     num_of_correct += 1
+            """
             if (num_of_correct >= quiz.passing_score * quiz.num_questions / 100):
                 is_passed = True
                 # Check if the module is the last module
