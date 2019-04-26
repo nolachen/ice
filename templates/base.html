@@ -29,15 +29,15 @@
             <div>
                 <a class="btn btn-secondary w-100" href="{% url 'courses:add_course' %}">Create Course</a>
             </div>
-            <div>
+            <!-- <div>
                 <a class="btn btn-secondary w-100" href="{% url 'courses:add_course' %}">Quiz Bank</a>
-            </div>
+            </div> -->
             <div class="dropdown">
                 <a class="btn btn-secondary dropdown-toggle w-100" href="#" role="button" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                     Manage Courses
                   </a>
                   <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
-                    <a class="dropdown-item" href="#">All Courses</a>
+                    <a class="dropdown-item" href="/">All Courses</a>
                     </div>
                 </div>
           {% elif user|is_learner %}
