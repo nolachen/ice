@@ -238,7 +238,7 @@ def home(request):
         'form': form,
     })
 
-# @login_required
+@login_required
 def module_list(request, course_id):
     course = Course.objects.get(id=course_id)
     modules = course.modules.order_by('index').all()
@@ -344,8 +344,7 @@ def reorder_component_save(request, course_id, module_id):
 @user_passes_test(is_instructor)
 def edit_module(request, course_id, module_id=None):
     course = get_object_or_404(Course, id=course_id)
-    if module_id:
-        module = get_object_or_404(Module, id=module_id)
+    module = get_object_or_404(Module, id=module_id) if module_id else None
 
     # You can only access this page if you own the course
     if request.user != course.instructor.instructor:
@@ -355,15 +354,13 @@ def edit_module(request, course_id, module_id=None):
     if request.method == 'POST':
         form = ModuleForm(request.POST, course_id=course_id)
         if form.is_valid():
-            # FIXME 
-            form = form.save(commit=False)
-            form.course = course
-            form.save()
+            quiz = form.cleaned_data.get('quiz')
+            new_module = form.save(commit=False)
+            new_module.course = course
+            new_module.save()
+            new_module.add_quiz(quiz)
             url = reverse("courses:module_list", kwargs={'course_id': course_id})
             return HttpResponseRedirect(url)
-
-    # if module_id:
-    #     module = Module.objects.get(id=module_id)
 
     # GET method
     else:
@@ -371,7 +368,7 @@ def edit_module(request, course_id, module_id=None):
 
     return render(request, 'courses/module_edit.html', {
         'course': course,
-        # 'module': module,
+        'module': module,
         'action_word': 'Add',
         'form': form
     })
