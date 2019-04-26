@@ -6,9 +6,13 @@
   <h3><a href="{% url 'courses:view_course' course_id=course.id %}">{{ course.name }}</a> > {{ module.title }} > Components</h3>
 
   {% if is_instructor %}
-    {% if course.deployed %}
-      <p>This course is deployed, you are not allowed to add components.</p>
+    {% if course.is_deployed %}
+      <p>This course is deployed, you are not allowed to add or reorder components.</p>
     {% else %}
+    <div class="reorder-components">
+      <a class="btn btn-primary" href="{% url 'courses:reorder_component' course_id=course.id module_id=module.id %}">Reorder components</a>
+      </br></br>
+    </div>
     <!-- ADD COMPONENT DROPDOWN MENU -->
     <div class="dropdown">
         <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown">Add components</button>

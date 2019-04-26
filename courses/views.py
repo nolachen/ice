@@ -40,8 +40,9 @@ def view_course(request, course_id):
         for module in modules:
             if Quiz.objects.filter(module=module).exists():
                 quiz = Quiz.objects.get(module=module)
-                quiz_result = QuizResult.objects.filter(learner__user=request.user, quiz_id=quiz.id)
-                if quiz_result.filter(passed=True).exists():
+                quiz_result = QuizResult.objects.filter(learner__learner=request.user, quiz_id=quiz.id)
+                if quiz_result.filter(is_passed=True).exists():
+
                     available_modules.append(module)
                 else:
                     available_modules.append(module)
@@ -211,7 +212,7 @@ def add_course(request):
 @user_passes_test(is_instructor)
 def deploy_course(request, course_id):
     course = Course.objects.get(id=course_id)
-    course.deployed = True
+    course.is_deployed = True
     course.save()
     print(course_id)
     return redirect('courses:view_course', course_id)
@@ -256,12 +257,12 @@ def module_list(request, course_id):
 def view_enrolled_course(request):
     learner = Learner.objects.get(user=request.user)
     not_completed_course = []
-    completed_enrollments = Enrollment.objects.filter(learner=learner, completed=True).order_by('completed_date')
+    completed_enrollments = Enrollment.objects.filter(learner=learner, is_completed=True).order_by('completed_date')
     cumulative_cecu = [0]
     for enrollment in completed_enrollments:
         cumulative_cecu.append(enrollment.course.cecu_value + cumulative_cecu[-1])
     completed_enrollments = zip(completed_enrollments, cumulative_cecu[1:])
-    not_completed_enrollments = Enrollment.objects.filter(learner=learner, completed=False)
+    not_completed_enrollments = Enrollment.objects.filter(learner=learner, is_completed=False)
     for enrollment in not_completed_enrollments:
         not_completed_course.append(Course.objects.get(enrollment=enrollment))
     return render(request, 'courses/enrolled_course_list.html', {
@@ -382,28 +383,28 @@ def take_quiz(request, course_id, module_id, quiz_id):
     quiz = Quiz.objects.get(id=quiz_id)
     # Check if Learner already passed the quiz
     quiz_result = QuizResult.objects.filter(learner=learner, quiz_id=quiz.id)
-    if quiz_result.filter(passed=True).exists():
+    if quiz_result.filter(is_passed=True).exists():
         return render(request, 'quiz/take.html', {
-            "passed": True,
+            "is_passed": True,
         })
 
     questions = quiz.question_set.all()
     if request.method == "POST":
         form = QuizForm(quiz_id, request.POST)
         if form.is_valid():
-            passed = False
+            is_passed = False
             num_of_correct = 0
             for question in questions:
                 if ( int(form.cleaned_data[str(question.id)]) == (Answer.objects.get(question_id=question.id).correct_answer_id)):
                     num_of_correct += 1
             if (num_of_correct >= quiz.passing_score * quiz.num_questions / 100):
-                passed = True
+                is_passed = True
                 # Check if the module is the last module
                 module = Module.objects.get(id=module_id)
                 course = Course.objects.get(id=course_id)
                 if (module == course.modules.order_by('index').last()):
                     enrollment = Enrollment.objects.get(learner=learner, course=course)
-                    enrollment.completed = True
+                    enrollment.is_completed = True
                     enrollment.completed_date = date.today()
                     enrollment.save()
 
@@ -419,16 +420,16 @@ def take_quiz(request, course_id, module_id, quiz_id):
                     )
                     email.send()
             else:
-                passed = False
+                is_passed = False
             
-            QuizResult.new_record(quiz.id, learner, num_of_correct / quiz.num_questions * 100, passed)
+            QuizResult.new_record(quiz.id, learner, num_of_correct / quiz.num_questions * 100, is_passed)
         else:
             raise Http404
 
         return render(request, 'quiz/result.html', {
             "course_id": quiz.course_id,
             "quiz": quiz,
-            "passed": passed,
+            "is_passed": is_passed,
             "score": num_of_correct / quiz.num_questions * 100,
             "passing_score": quiz.passing_score * quiz.num_questions,
         })

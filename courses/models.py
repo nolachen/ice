@@ -11,7 +11,7 @@ class Learner(models.Model):
         on_delete=models.CASCADE
     )
     staff_id = models.CharField(max_length=8, validators=[MinLengthValidator(8)], unique=True)
-    cecu_awarded = models.PositiveSmallIntegerField()
+    cecu_awarded = models.PositiveSmallIntegerField(default=0)
 
     def award_cecu_credit(self, cecu_value):
         self.cecu_awarded += cecu_value
@@ -35,7 +35,7 @@ class Course(models.Model):
     cecu_value = models.PositiveSmallIntegerField()
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
     description = models.TextField(default='')
-    deployed = models.BooleanField(default=False)
+    is_deployed = models.BooleanField(default=False)
 
     def __str__(self):
         return self.name
@@ -107,12 +107,12 @@ class QuizResult(models.Model):
     # Result will be stored in the form of over a hundred
     # For example, if a learner score 4 out of 5 questions, the result stored will be 80.0
     result = models.FloatField(validators=[MaxValueValidator(100), MinValueValidator(0)])
-    passed = models.BooleanField(default=False)
+    is_passed = models.BooleanField(default=False)
     timestamp = models.DateTimeField(auto_now_add=True)
 
     @staticmethod
-    def new_record(quiz_id, learner, result, passed):
-        new_result = QuizResult(quiz_id=quiz_id, learner=learner, result=result, passed=passed)
+    def new_record(quiz_id, learner, result, is_passed):
+        new_result = QuizResult(quiz_id=quiz_id, learner=learner, result=result, is_passed=is_passed)
         new_result.save()
 
 # Component Model
@@ -180,7 +180,7 @@ class ImageComponent(Component):
 class Enrollment(models.Model):
     course = models.ForeignKey(Course, on_delete=models.CASCADE)
     learner = models.ForeignKey(Learner, on_delete=models.CASCADE)
-    completed = models.BooleanField(default=False)
+    is_completed = models.BooleanField(default=False)
     completed_date = models.DateField(null=True, blank=True)
 
     @staticmethod
