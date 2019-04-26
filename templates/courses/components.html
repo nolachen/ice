@@ -7,6 +7,9 @@
 <div class="course_components">
     <h3><a href="{% url 'courses:view_course' course_id=course.id %}">{{ course.name }}</a> > Components</h3>
 
+    {% if course.deployed %}
+    <p>The course is deployed, you are not allowed to add new component</p>
+    {% else %}
     <div class="dropdown">
         <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown">Add new component</button>
         <div class="dropdown-menu">
@@ -18,6 +21,7 @@
             </a>
         </div>
     </div>
+    {% endif %}
 
     <table class="table">
         <tr>

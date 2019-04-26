@@ -9,7 +9,8 @@
   <link rel="stylesheet" type="text/css" href="{% static 'css/styles.css' %}" />
   <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}"/>
 
-  <script  src="{% static 'js/jquery-3.3.1.min.js' %}"></script>
+  <script src="{% static 'js/jquery-3.3.1.min.js' %}"></script>
+  <script src="{% static 'js/jquery.sortable.min.js' %}"></script>
   <script src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
 
   <title>{% block title %}ICE{% endblock %}</title>
@@ -18,9 +19,10 @@
   <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
       <a class="navbar-brand" href="/">ICE</a>
   </nav>
-  <div class="page">
+  <div class="page container-fluid">
+    <div class="row">
     {% if user.is_authenticated %}
-    <div class="sidenav">
+    <div class="sidenav col-sm-2">
         <div class="sidenav-actions">
           {% if user|is_instructor %}
             <h3 class="text-center">Instructor Portal</h3>
@@ -43,7 +45,7 @@
             <div class="dropdown">
               <a class="btn btn-secondary dropdown-toggle w-100" href="#" role="button" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                   Manage Courses
-                </a>
+              </a>
                 <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
                   <a class="dropdown-item" href="{% url 'home'%}">All Courses</a>
                   <a class="dropdown-item" href="{% url 'courses:view_enrolled_course'%}">My Courses</a>
@@ -60,15 +62,15 @@
                   <a class="dropdown-item" href="{% url 'restrict_access'%}">Restrict User</a>
                   </div>
               </div>
-        </div>
         {% endif %}
+        </div>
         <a class="btn btn-primary logout w-100" href="{% url 'logout' %}">Log Out</a>
       </div>
       {% endif %}
-    </div>
-    <div class="content">
+    <div class="content col-sm-10">
       {% block content %}
       {% endblock %}
+    </div>
     </div>
   </div>
 </body>

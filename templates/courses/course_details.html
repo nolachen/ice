@@ -3,66 +3,65 @@
 
   {% block title %}Home{% endblock %}
   {% block content %}
-  <div class="container" style="padding-top:10px">
-    <h4>Course Information</h4>
-    <div class="row ">
-      <div class="col-md-12">
-  
-        {% if course %}
+  <h1>Course Details</h1>
+  <div class="course-info-container">
+  {% if course %}
+    <div class="course-info-card card bg-light mb-3">
+      <h4 class="card-header">Information</h4>
+      <div class="card-body">
         <p> Name: {{ course.name }}</p>
         <p> Category: {{ course.category }}</p>
-        <p> Insructor: {{ instructor.first_name }} {{ instructor.last_name }}</p>
+        <p> Instructor: {{ instructor.first_name }} {{ instructor.last_name }}</p>
         <p> Description: {{ course.description }}</p>
-  
-        </br>
-        
-        <h4> Modules </h4>
-        {% if user|is_instructor %}
-        <a href="{% url 'courses:new_module' course_id=course.id %}">Create module</a>
-        {% endif %}
-        <div id="moduleContainer">
-          <h5> Available Modules </h5>
-          <ul id="available_modules">
-            {% for module in available_modules %}
-              <li role="presentation" id="{{ module.id }}">
-                <a href="{% url 'courses:load_components' course_id=course.id module_id=module.id %}">{{ module.title }}</a>
-              </li>
-            {% endfor %}
-          </ul>
-  
-          <br>
-          
-          <h5> Locked Modules </h5>
-          <ul id="locked_modules">
-            {% for module in locked_modules %}
-              <li role="presentation" id="{{ module.id }}">
-                <p>{{ module.title }}</p>
-              </li>
-            {% endfor %}
-          </ul>
-        </div>
-  
-        </br>
-  
+        <hr>
         {% if is_learner %}
-  
           {% if is_enrolled %}
             <p>You have enrolled into this course! Enjoy!</p>
           {% else %}
-            <a href="{% url 'courses:enroll_course' course_id=course.id %}">Enroll</a>
+            <a class="btn btn-info" href="{% url 'courses:enroll_course' course_id=course.id %}">Enroll</a>
           {% endif %}
-        
         {% else %}
-
-        <h4>Components</h4>
-        <a href="{% url 'courses:all_components' course_id=course.id %}">View all components</a>
-
-      {% endif %}
-
-      {% else %}
-      <p>No course information available for this course</p>
-      {% endif %}
-
+          <h4>Components</h4>
+          <a class="btn btn-info" href="{% url 'courses:all_components' course_id=course.id %}">View all components</a>
+        {% endif %}
+      </div>
+    </div>
+    <div class="course-details-modules card bg-light mb-3">
+      <div>
+        <h4 class="card-header">Modules</h4>
+        <div class="card-body">
+          {% if user|is_instructor %}
+            <a class="btn btn-dark" href="{% url 'courses:new_module' course_id=course.id %}">Create module</a>
+            <hr>
+          {% endif %}
+          <div id="moduleContainer">
+            <h5> Available </h5>
+            <ul id="available_modules">
+              {% for module in available_modules %}
+                <li class="module-list" role="presentation" id="{{ module.id }}">
+                  <a class="btn btn-info" href="{% url 'courses:load_components' course_id=course.id module_id=module.id %}">{{ module.title }}</a>
+                </li>
+              {% endfor %}
+            </ul>
+          </div>
+          <hr>
+        <div>
+          <h5> Locked </h5>
+          <ul id="locked_modules">
+          {% for module in locked_modules %}
+            <li role="presentation" id="{{ module.id }}">
+              <p>{{ module.title }}</p>
+            </li>
+          {% endfor %}
+          </ul>
+        </div>
+      </div>
+      </div>
+    </div>
+  </div>  
+  {% else %}
+    <p>No course information available for this course</p>
+  {% endif %}
     </div>
   </div>
   {% endblock %}
