@@ -113,9 +113,6 @@ def load_components(request, course_id, module_id):
     }
     return render(request, 'courses/component_list.html', context)
 
-"""
-View for all of the components in a course
-"""
 @user_passes_test(is_instructor)
 def all_components(request, course_id):
     course = Course.objects.get(id=course_id)
@@ -200,11 +197,6 @@ def new_component(request, course_id, module_id=None, type=None, component_id=No
     
     return render(request, 'courses/component_edit.html', context) 
 
-"""
-Responsible for adding new courses
-
-Utilized CourseForm which is in the file forms.py
-"""
 @user_passes_test(is_instructor)
 def add_course(request):
     if request.POST:
@@ -483,41 +475,43 @@ def take_quiz(request, course_id, module_id, quiz_id):
         "form": form,
     })
 
-# def view_component(request, course_id):
-#     course = Course.objects.get(id=course_id)
-#     template = 'courses/component_details.html'
+"""
+def view_component(request, course_id):
+    course = Course.objects.get(id=course_id)
+    template = 'courses/component_details.html'
 
-#     return render(request, template, {
-#         'course': course
-#     })
+    return render(request, template, {
+        'course': course
+    })
 
-# @user_passes_test(is_instructor)
-# def upload_image(request, course_id):
-#     course = Course.objects.get(id=course_id)
+@user_passes_test(is_instructor)
+def upload_image(request, course_id):
+    course = Course.objects.get(id=course_id)
 
-#     if request.method == 'POST':
-#         form = ImageUploadForm(request.POST, request.FILES, course_id=course_id)
-#         if form.is_valid():
-#             form = form.save(commit=False)
-#             form.course = course
-#             form.save()
-#             return render(request, 'courses/component_details.html', {
-#                 'course_id': course_id,
-#                 'course': course,
-#                 'form': form,
-#             })
-#         else:
-#             raise Http404
+    if request.method == 'POST':
+        form = ImageUploadForm(request.POST, request.FILES, course_id=course_id)
+        if form.is_valid():
+            form = form.save(commit=False)
+            form.course = course
+            form.save()
+            return render(request, 'courses/component_details.html', {
+                'course_id': course_id,
+                'course': course,
+                'form': form,
+            })
+        else:
+            raise Http404
 
-#         return render(request, 'courses/component_details.html', {
-#             'course_id': course_id,
-#             'course': course,
-#         })
-#     else:
-#         form = ImageUploadForm(request.POST, request.FILES, course_id=course_id)
+        return render(request, 'courses/component_details.html', {
+            'course_id': course_id,
+            'course': course,
+        })
+    else:
+        form = ImageUploadForm(request.POST, request.FILES, course_id=course_id)
     
-#     return render(request, 'courses/create_image_component.html', { 
-#         'form': form,
-#         'course_id': course_id, 
-#         'course': course,
-#     })
+    return render(request, 'courses/create_image_component.html', { 
+        'form': form,
+        'course_id': course_id, 
+        'course': course,
+    })
+"""

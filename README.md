@@ -12,6 +12,5 @@ Please run the following commands and install the missing dependencies if it fai
 1. Run `python manage.py migrate` to ensure database is up to date.
 2. Run `python manage.py runserver` to launch ICE and it is accessible on http://127.0.0.1:8000/
 
-## Functionality Missing / To Be Fixed:
-1. (for Instructors) <When adding a module to a course> Indicate a position for insertion.
-2. The name of the foreign key of Learner and Instructor should be User for easier understanding.
+## To Be Fixed:
+1. The name of the foreign key of Learner and Instructor should be User for easier understanding.

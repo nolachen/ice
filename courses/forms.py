@@ -13,9 +13,6 @@ class BaseForm(forms.ModelForm):
             else:     
                 field.widget.attrs['class'] = 'form-control'
 
-"""
-For adding new courses
-"""
 class CourseForm(forms.ModelForm):
     class Meta:
         model = Course
@@ -33,14 +30,16 @@ class ModuleForm(BaseForm):
 
         super(ModuleForm, self).__init__(*args, **kwargs)
         course = Course.objects.get(id=course_id)
-        # self.fields['textcomponents'] = forms.ModelMultipleChoiceField(
-        #     required=False,
-        #     queryset=course.textcomponents.filter(module__isnull=True)
-        # )
-        # self.fields['imagecomponents'] = forms.ModelMultipleChoiceField(
-        #     required=False,
-        #     queryset=course.imagecomponents.filter(module__isnull=True)
-        # )
+        """
+        self.fields['textcomponents'] = forms.ModelMultipleChoiceField(
+            required=False,
+            queryset=course.textcomponents.filter(module__isnull=True)
+        )
+        self.fields['imagecomponents'] = forms.ModelMultipleChoiceField(
+            required=False,
+            queryset=course.imagecomponents.filter(module__isnull=True)
+        )
+        """
         self.fields['quiz'] = forms.ModelChoiceField(
             required=True,
             queryset=course.quizzes.filter(module__isnull=True)

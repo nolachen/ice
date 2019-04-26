@@ -6,7 +6,7 @@ from django.utils.html import format_html
 from django.core.validators import MaxValueValidator, MinValueValidator, MinLengthValidator
 
 class Learner(models.Model):
-    learner = models.OneToOneField(
+    learner = models.OneToOneField(     # to be fixed: should change the name to user
         User,
         on_delete=models.CASCADE
     )
@@ -17,7 +17,7 @@ class Learner(models.Model):
         self.cecu_awarded += cecu_value
 
 class Instructor(models.Model):
-    instructor = models.OneToOneField(
+    instructor = models.OneToOneField(     # to be fixed: should change the name to user
         User,
         on_delete=models.CASCADE
     )
@@ -119,7 +119,6 @@ class QuizResult(models.Model):
         new_result = QuizResult(quiz_id=quiz_id, learner=learner, result=result, is_passed=is_passed)
         new_result.save()
 
-# Component Model
 class Component(models.Model):
     course = models.ForeignKey(Course, related_name="%(class)ss", on_delete=models.CASCADE)
     module = models.ForeignKey(Module, on_delete=models.SET_NULL, null=True, blank=True)
