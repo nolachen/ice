@@ -15,6 +15,7 @@ urlpatterns = [
     # path('<int:course_id>/modules/<int:module_id>', views.module, name='module'),
     # path('<int:course_id>/modules/<int:module_id>/quiz', views.module_quiz, name='quiz'),
     path('<int:course_id>/new_module', views.edit_module, name='new_module'),
+    path('<int:course_id>/modules/<int:module_id>/edit', views.edit_module, name='edit_module'),
     path('<int:course_id>/reorder_module', views.reorder_module, name='reorder_module'),
     path('<int:course_id>/reorder_module_save', views.reorder_module_save, name='reorder_module_save'),
     path('<int:course_id>/modules/<int:module_id>/reorder_component', views.reorder_component, name='reorder_component'),

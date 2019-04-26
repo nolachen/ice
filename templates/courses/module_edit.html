@@ -1,25 +1,40 @@
+<!-- Edit/Create a single module -->
+
 {% extends 'base.html' %}
 
 {% block content %}
-<h1>{{ course.name }} > {{ action_word }} Module</h1>
 
-<form action="{% url 'courses:new_module' course_id=course.id %}" method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <input type="submit" value="Submit">
-    <!-- <div>
-        <label for="module_title">Title: </label>
-        <input id="module_title" type="text" name="module_title" />
+<div class="course_module_edit">
+    <h3>{{ course.name }} > {{ module|yesno:"Edit,Create" }} Module</h3>
 
-        <label for="module_components">Components: </label>
-        <select id="module_components"
+    {% if form.non_field_errors %}
+    <div class="alert alert-danger" role="alert">
+        {{ form.non_field_errors }}
+    </div>
+    {% endif %}
 
-        <label for="module_quiz">Quiz: </label>
-        <select id="module_quiz" name=>
+    <form action="" method="post">
+        {% csrf_token %}
+        {% for field in form %}
+            <div class="form-group">
+                {% if field.errors %}
+                <div class="alert alert-info" role="alert">
+                    {{ field.errors }}
+                </div>
+                {% endif %}
 
-        </select>
+                {{ field.label_tag }} {{ field }}
 
-        <input type="submit" value="OK" />
-    </div> -->
-</form>
+                {% if field.help_text %}
+                <small class="text-muted">{{ field.help_text|safe }}</small>
+                {% endif %}
+            </div>
+        {% endfor %}
+        <input class="btn btn-success" type="submit" value="Submit">
+        <a class="btn btn-danger" href="{% url 'courses:view_course' course_id=course.id %}">Cancel</a>
+    </form>
+    
+</div>
+
+
 {% endblock %}
