@@ -82,12 +82,14 @@ def load_components(request, course_id, module_id):
     quiz = Quiz.objects.get(module_id=module_id)
 
     if request.POST and is_instructor(request.user):
-        form = AddExistingComponentsForm(request.POST, course_id=course_id)
+        form = AddExistingComponentsForm(request.POST, course_id=course_id, module_id=module_id)
         if form.is_valid():
+            index = form.cleaned_data['index']
             for component in form.cleaned_data['components']:
-                module.add_component(component)
+                module.add_component(component, index)
+                index = index + 1
 
-    add_components_form = AddExistingComponentsForm(course_id=course_id)
+    add_components_form = AddExistingComponentsForm(course_id=course_id, module_id = module_id)
     context = {
         'is_learner': is_learner(request.user),
         'is_instructor': is_instructor(request.user),
