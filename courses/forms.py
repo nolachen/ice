@@ -21,7 +21,7 @@ class CourseForm(forms.ModelForm):
         model = Course
         fields = ['name', 'cecu_value', 'description', 'category']
 
-class ModuleForm(forms.ModelForm):
+class ModuleForm(BaseForm):
     class Meta:
         model = Module
         fields = ['title']

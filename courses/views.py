@@ -369,7 +369,6 @@ def edit_module(request, course_id, module_id=None):
     return render(request, 'courses/module_edit.html', {
         'course': course,
         'module': module,
-        'action_word': 'Add',
         'form': form
     })
 
