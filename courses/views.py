@@ -256,15 +256,18 @@ def module_list(request, course_id):
 def view_enrolled_course(request):
     learner = Learner.objects.get(learner=request.user)
     not_completed_course = []
+    completed_course = []
     completed_enrollments = Enrollment.objects.filter(learner=learner, is_completed=True).order_by('completed_date')
     cumulative_cecu = [0]
     for enrollment in completed_enrollments:
+        completed_course.append(Course.objects.get(enrollment=enrollment))
         cumulative_cecu.append(enrollment.course.cecu_value + cumulative_cecu[-1])
     completed_enrollments = zip(completed_enrollments, cumulative_cecu[1:])
     not_completed_enrollments = Enrollment.objects.filter(learner=learner, is_completed=False)
     for enrollment in not_completed_enrollments:
         not_completed_course.append(Course.objects.get(enrollment=enrollment))
     return render(request, 'courses/enrolled_course_list.html', {
+        'completed_course': completed_course,
         'completed_enrollments': completed_enrollments,
         'not_completed_course': not_completed_course,
     })

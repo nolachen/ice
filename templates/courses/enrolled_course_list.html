@@ -9,40 +9,42 @@
 <div class="enrolled-courses-container">
     <div class="completed-courses-card card bg-light">
         <h4 class="card-header">Completed</h4>
-        {% if completed_enrollments %}
-              <div class="card-body">
-                {% for enrollment, cecu in completed_enrollments %}
-                  <p><a class="btn btn-info" href="{% url 'courses:view_course' course_id=enrollment.course.id %}">{{ enrollment.course.name }}</a></p>
-                  <p>Date of Completetion: {{ enrollment.completed_date }}</p>
-                  <p>CECU Value: {{ enrollment.course.cecu_value }}</p>
-                  <p>Cumulative CECU Value: {{ cecu }}</p>
-                  <hr>
-                {% endfor %}
-              </div>
-      </div>
-      {% else %}
-        <div class="card-body">
-          <p>No completed courses available</p>
-        </div>
-      {% endif %}
-
-      {% if not_completed_course %}
+        {% if completed_course %}
+          <div class="card-body">
+            {% for enrollment, cecu in completed_enrollments %}
+              <p><a class="btn btn-info" href="{% url 'courses:view_course' course_id=enrollment.course.id %}">{{ enrollment.course.name }}</a></p>
+              <p>Date of Completetion: {{ enrollment.completed_date }}</p>
+              <p>CECU Value: {{ enrollment.course.cecu_value }}</p>
+              <p>Cumulative CECU Value: {{ cecu }}</p>
+              <hr>
+            {% endfor %}
+          </div>
+    
+        {% else %}
+          <div class="card-body">
+            <p>No completed courses available</p>
+          </div>
+        {% endif %}
+    </div>
       <div class="incomplete-course-card card bg-light">
-        <h4 class="card-header">Incomplete</h4>
-        <div class="card-body">
-          <ul>
-            {% for course in not_completed_course %}
-              <li class="enrolled-course-incomplete">
-                  <a class="btn btn-info" href="{% url 'courses:view_course' course_id=course.id %}">{{ course.name }}</a>
-                <hr>
-              </li>
-          {% endfor %}
-          </ul>
-        </div>
+        <h4 class="card-header">Incompleted</h4>
+        {% if not_completed_course %}
+          <div class="card-body">
+            <ul>
+              {% for course in not_completed_course %}
+                <li class="enrolled-course-incomplete">
+                    <a class="btn btn-info" href="{% url 'courses:view_course' course_id=course.id %}">{{ course.name }}</a>
+                  <hr>
+                </li>
+              {% endfor %}
+            </ul>
+          </div>
+        {% else %}
+          <div class="card-body">
+            <p>No incompleted courses available</p>
+          </div>
+        {% endif %}
       </div>
-      {% else %}
-      <p>No in-progress courses</p>
-      {% endif %}
     </div>
   </div>
 </div>
