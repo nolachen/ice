@@ -1,27 +1,22 @@
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
 from django.http import HttpRequest, HttpResponseRedirect, HttpResponse, Http404, JsonResponse
 from django.template import loader
-from django.contrib.auth.decorators import login_required, user_passes_test
-from django.urls import reverse
+from django.urls import reverse, reverse_lazy
 from django.template.loader import render_to_string
 from django.core.mail import EmailMessage
+
+from django.contrib.auth import logout, authenticate, login
+from django.contrib.auth.models import User
+from django.contrib.auth.forms import AuthenticationForm
+from django.contrib.auth.decorators import login_required, user_passes_test
 
 from courses.forms import CourseForm, ModuleForm, QuizForm, ImageUploadForm, TextComponentForm, SelectCategoryForm, AddExistingComponentsForm
 from courses.models import Instructor, Learner, Course, Module, Quiz, Answer, QuizResult, Component, Enrollment
 
-import logging, json
-logger = logging.getLogger(__name__)
-
-from django.template import loader
-from django.shortcuts import redirect
-from django.contrib.auth.models import User
-from django.contrib.auth import logout, authenticate, login
-from django.contrib.auth.forms import AuthenticationForm
-
-from django.urls import reverse_lazy
-
 from datetime import date
 
+import logging, json
+logger = logging.getLogger(__name__)
 
 # USER IDENTITY HELPERS
 def is_instructor(user):
