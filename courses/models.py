@@ -6,7 +6,7 @@ from django.utils.html import format_html
 from django.core.validators import MaxValueValidator, MinValueValidator, MinLengthValidator
 
 class Learner(models.Model):
-    user = models.OneToOneField(
+    learner = models.OneToOneField(
         User,
         on_delete=models.CASCADE
     )
@@ -17,7 +17,7 @@ class Learner(models.Model):
         self.cecu_awarded += cecu_value
 
 class Instructor(models.Model):
-    user = models.OneToOneField(
+    instructor = models.OneToOneField(
         User,
         on_delete=models.CASCADE
     )
