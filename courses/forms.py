@@ -2,7 +2,6 @@ from django import forms
 from courses.models import Course, Module, Component, Category, Question, Answer, Choice, Quiz, ImageComponent, TextComponent
 import logging
 logger = logging.getLogger(__name__)
-from random import shuffle
 
 # Base form to add Bootstrap 'form-control' class to every input
 class BaseForm(forms.ModelForm):
