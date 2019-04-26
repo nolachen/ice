@@ -20,16 +20,16 @@ logger = logging.getLogger(__name__)
 
 # USER IDENTITY HELPERS
 def is_instructor(user):
-    return Instructor.objects.filter(instructor_id=user.id).exists()
+    return Instructor.objects.filter(user_id=user.id).exists()
 
 def is_learner(user):
-    return Learner.objects.filter(learner_id=user.id).exists()
+    return Learner.objects.filter(user_id=user.id).exists()
 
 @login_required
 def view_course(request, course_id):
     is_enrolled = False
     course = Course.objects.get(id=course_id)
-    instructor = User.objects.get(id=course.instructor.instructor_id)
+    instructor = User.objects.get(id=course.instructor.user_id)
     modules = course.modules.order_by('index').all()
     available_modules = []
     locked_modules = []
@@ -40,7 +40,7 @@ def view_course(request, course_id):
         for module in modules:
             if Quiz.objects.filter(module=module).exists():
                 quiz = Quiz.objects.get(module=module)
-                quiz_result = QuizResult.objects.filter(learner__learner=request.user, quiz_id=quiz.id)
+                quiz_result = QuizResult.objects.filter(learner__user=request.user, quiz_id=quiz.id)
                 if quiz_result.filter(passed=True).exists():
                     available_modules.append(module)
                 else:
@@ -50,7 +50,7 @@ def view_course(request, course_id):
                     break
 
     if is_learner(request.user):
-        learner = Learner.objects.get(learner_id=request.user.id)
+        learner = Learner.objects.get(user_id=request.user.id)
         enrollments = Enrollment.objects.filter(learner=learner)
         if enrollments.filter(course=course).exists():
             is_enrolled = True
@@ -70,7 +70,7 @@ def view_course(request, course_id):
 
 @user_passes_test(is_learner)
 def enroll_course(request, course_id):
-    learner = Learner.objects.get(learner_id=request.user.id)
+    learner = Learner.objects.get(user_id=request.user.id)
     course = Course.objects.get(id=course_id)
     Enrollment.enroll(learner, course)
     return redirect('courses:view_enrolled_course')
@@ -132,7 +132,7 @@ def new_component(request, course_id, module_id=None, type=None, component_id=No
     module = Module.objects.get(id=module_id) if module_id else None
 
     # You can only access this page if you own the course
-    if request.user != course.instructor.instructor:
+    if request.user != course.instructor.user:
         raise Http404
 
     if component_id:
@@ -197,7 +197,7 @@ def add_course(request):
         form = CourseForm(request.POST)
         if form.is_valid():
             new_course = form.save(commit=False)
-            new_course.instructor_id = Instructor.objects.get(instructor_id=request.user.id).id
+            new_course.instructor_id = Instructor.objects.get(user_id=request.user.id).id
             new_course.save()
             return HttpResponseRedirect(new_course.get_absolute_url())
         else:
@@ -229,7 +229,7 @@ def home(request):
                 'form': form,
             })
     if is_instructor(request.user):
-        courses = Course.objects.filter(instructor=Instructor.objects.get(instructor=request.user))
+        courses = Course.objects.filter(instructor=Instructor.objects.get(user=request.user))
     else:
         courses = Course.objects.all()
     form = SelectCategoryForm()
@@ -254,7 +254,7 @@ def module_list(request, course_id):
 
 @user_passes_test(is_learner)
 def view_enrolled_course(request):
-    learner = Learner.objects.get(learner=request.user)
+    learner = Learner.objects.get(user=request.user)
     not_completed_course = []
     completed_enrollments = Enrollment.objects.filter(learner=learner, completed=True)
     cumulative_cecu = [0]
@@ -274,7 +274,7 @@ def reorder_module(request, course_id):
     course = Course.objects.get(id=course_id)
     modules = course.modules.order_by('index').all()
 
-    if request.user != course.instructor.instructor:
+    if request.user != course.instructor.user:
         raise Http404
 
     return render(request, 'courses/module_reorder.html', {
@@ -286,7 +286,7 @@ def reorder_module(request, course_id):
 def reorder_module_save(request, course_id):
     course = Course.objects.get(id=course_id)
 
-    if request.user != course.instructor.instructor:
+    if request.user != course.instructor.user:
         raise Http404
     
     if request.method == "POST" and request.is_ajax():
@@ -310,7 +310,7 @@ def reorder_component(request, course_id, module_id):
     module = Module.objects.get(id=module_id)
     components = Component.objects.filter(module_id=module_id)
 
-    if request.user != course.instructor.instructor:
+    if request.user != course.instructor.user:
         raise Http404
 
     return render(request, 'courses/component_reorder.html', {
@@ -323,7 +323,7 @@ def reorder_component(request, course_id, module_id):
 def reorder_component_save(request, course_id, module_id):
     course = Course.objects.get(id=course_id)
 
-    if request.user != course.instructor.instructor:
+    if request.user != course.instructor.user:
         raise Http404
     
     if request.method == "POST" and request.is_ajax():
@@ -348,7 +348,7 @@ def edit_module(request, course_id, module_id=None):
         module = get_object_or_404(Module, id=module_id)
 
     # You can only access this page if you own the course
-    if request.user != course.instructor.instructor:
+    if request.user != course.instructor.user:
         raise Http404
 
     # process form data
@@ -378,7 +378,7 @@ def edit_module(request, course_id, module_id=None):
 
 @user_passes_test(is_learner)
 def take_quiz(request, course_id, module_id, quiz_id):
-    learner = Learner.objects.get(learner=request.user)
+    learner = Learner.objects.get(user=request.user)
     quiz = Quiz.objects.get(id=quiz_id)
     # Check if Learner already passed the quiz
     quiz_result = QuizResult.objects.filter(learner=learner, quiz_id=quiz.id)
