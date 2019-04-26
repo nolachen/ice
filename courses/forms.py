@@ -118,3 +118,6 @@ class AddExistingComponentsForm(forms.Form):
             widget=forms.CheckboxSelectMultiple,
             queryset=Component.objects.filter(course=course_id, module__isnull=True)
         )
+        # module_id = kwargs.pop('module_id')
+        # max = Course.objects.filter(module_id=module_id).count()
+        self.fields['index to insert'] = forms.IntegerField(min_value=0, widget=forms.NumberInput())
