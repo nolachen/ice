@@ -48,20 +48,20 @@ class ModuleForm(BaseForm):
 
 class QuizForm(forms.Form):
     def __init__(self, quiz_id, *args, **kwargs):
-        quiz = Quiz.objects.get(id=quiz_id)
-        # If I dont use [:quiz.num_questions], then everything will be fine,
-        # otherwise the score is calculated randomly, even same choices are selected,
-        # the result score differs
-        questions = quiz.question_set.all().order_by('?')
+        # If we passed in questions use those bc we need to preserve them across the request cycle
+        questions = kwargs.pop('questions', None)
         super(QuizForm, self).__init__(*args, **kwargs)
+
+        quiz = Quiz.objects.get(id=quiz_id)
+
+        if not questions:
+            questions = quiz.question_set.all().order_by('?')[:quiz.num_questions]
+
         for question in questions:
             choices = []
             for choice in Choice.objects.filter(question_id=question.id):
                 choices.append((choice.id, choice.choice_text))
-            self.fields[str(question.id)] = forms.ChoiceField(label=question.question_text, required=False, choices=choices, widget=forms.RadioSelect)
-        print (questions.count())
-        for i in range(questions.count() - quiz.num_questions):
-            self.fields.pop(str(i + 1))
+            self.fields[str(question.id)] = forms.ChoiceField(label=question.question_text, required=False, choices=choices, widget=forms.RadioSelect(attrs={'id': question.id}))
 
 class ComponentForm(BaseForm):
     def __init__(self, *args, **kwargs):

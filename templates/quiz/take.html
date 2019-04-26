@@ -8,7 +8,12 @@
     <h1>{{ quiz.title }}</h1>
     <hr>
     {% csrf_token %}
-    {{ form }}
+    {% for field in form %}
+    <div class="myradio">
+        {{ field.label_tag }} {{ field }}
+        <input type="hidden" value="{{ field.field.widget.attrs.id }}" name="question">
+    </div>
+    {% endfor %}
     <button class="btn btn-success" type="submit" value="Submit">Submit Quiz</button>
     {% endif %}
 </form>

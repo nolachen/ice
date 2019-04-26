@@ -11,7 +11,7 @@ from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.decorators import login_required, user_passes_test
 
 from courses.forms import CourseForm, ModuleForm, QuizForm, ImageUploadForm, TextComponentForm, SelectCategoryForm, AddExistingComponentsForm
-from courses.models import Instructor, Learner, Course, Module, Quiz, Answer, QuizResult, Component, Enrollment
+from courses.models import Instructor, Learner, Course, Module, Quiz, Answer, QuizResult, Component, Enrollment, Question
 
 from datetime import date
 
@@ -397,8 +397,7 @@ def take_quiz(request, course_id, module_id, quiz_id):
         })
 
     if request.method == "POST":
-        form = QuizForm(quiz_id, request.POST)
-        print(form.errors)
+        form = QuizForm(quiz_id, request.POST, questions=Question.objects.filter(id__in=request.POST.getlist('question')))
         if form.is_valid():
             print(form.cleaned_data)
             num_of_correct = 0
