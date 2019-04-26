@@ -2,41 +2,44 @@
 
 {% block content %}
 
-<script>
-    $(function() {
-		$("#save").button().click(function(e) {
-			var arrayOrder = $("#sortable").sortable("toArray")[0];
-			var new_module_list = []
-			$.each(arrayOrder.children, function() {
-				new_module_list.push(this.id);
+<div class="course_component_reorder">
+	<h3><a href="{% url 'courses:view_course' course_id=course.id %}">{{ course.name }}</a> > {% if module %} {{ module.title }} > {% endif %} Reorder Modules</h3>
+	<script>
+			$(function() {
+			$("#save").button().click(function(e) {
+				var arrayOrder = $("#sortable").sortable("toArray")[0];
+				var new_module_list = []
+				$.each(arrayOrder.children, function() {
+					new_module_list.push(this.id);
+				});
+				$.ajax({
+					type: "POST",
+					url: "reorder_module_save",
+					dataType: "json",
+					data: {
+						csrfmiddlewaretoken: '{{ csrf_token }}',
+						new_module_order: JSON.stringify(new_module_list),
+					}
+				}).fail(function(XMLHttpRequest, textStatus, errorThrown){
+							console.log('ERROR: ' + errorThrown)
+				}).done(function(data){
+							alert('The new order is saved!');
+					window.location.href = "{% url 'courses:view_course' course_id=course.id %}";
+				})
 			});
-			$.ajax({
-				type: "POST",
-				url: "reorder_module_save",
-				dataType: "json",
-				data: {
-					csrfmiddlewaretoken: '{{ csrf_token }}',
-					new_module_order: JSON.stringify(new_module_list),
-				}
-			}).fail(function(XMLHttpRequest, textStatus, errorThrown){
-        		console.log('ERROR: ' + errorThrown)
-			}).done(function(data){
-        		alert('The new order is saved!');
-				window.location.href = "{% url 'courses:view_course' course_id=course.id %}";
-			})
+			$("#sortable").sortable();
 		});
-		$("#sortable").sortable();
-	});
-</script>
+	</script>
 
-<div>
-	<ul id="sortable">
-		{% for module in modules %}
-			<li id="{{ module.id }}">{{ module.title }}</li>
-		{% endfor %}
-	  </ul>
-	</br>
-	  <a id="save" href="#">Save Changes</a>
+	<div>
+		<ul id="sortable">
+			{% for module in modules %}
+				<li id="{{ module.id }}">{{ module.title }}</li>
+			{% endfor %}
+			</ul>
+		</br>
+			<a id="save" href="#">Save Changes</a>
+	</div>
 </div>
 
 {% endblock %}
