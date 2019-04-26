@@ -82,7 +82,7 @@ def enroll_course(request, course_id):
 
 def load_components(request, course_id, module_id):  
     module = Module.objects.get(id=module_id)
-    components = module.get_components().order_by("index")
+    components = Component.objects.filter(module_id=module_id).order_by("index")
     course = get_object_or_404(Course, id=course_id)
     quiz = Quiz.objects.get(module_id=module_id)
 
@@ -110,7 +110,7 @@ View for all of the components in a course
 @user_passes_test(is_instructor)
 def all_components(request, course_id):
     course = Course.objects.get(id=course_id)
-    components = course.get_components()
+    components = Component.objects.filter(course_id=course_id)
     return render(request, 'courses/components.html', {
         'components': components,
         'course': course
@@ -313,7 +313,7 @@ def reorder_module_save(request, course_id):
 def reorder_component(request, course_id, module_id):
     course = Course.objects.get(id=course_id)
     module = Module.objects.get(id=module_id)
-    components = module.get_components()
+    components = Component.objects.filter(module_id=module_id)
 
     if request.user != course.instructor.instructor:
         raise Http404

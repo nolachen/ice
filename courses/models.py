@@ -32,7 +32,6 @@ class Category(models.Model):
 class Course(models.Model):
     name = models.CharField(max_length=200)
     instructor = models.ForeignKey(Instructor, on_delete=models.CASCADE)
-    #instructor_name = models.TextField(default='')
     cecu_value = models.PositiveSmallIntegerField()
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
     description = models.TextField(default='')
@@ -40,18 +39,6 @@ class Course(models.Model):
 
     def __str__(self):
         return self.name
-
-    def getModules(self):
-	    return Module.objects.filter(course = self)
-
-    def addModule(self, moduleName, modulePosition):
-        new_module = Module(name = moduleName, index = modulePosition, course = self)
-        new_module.save()
-
-    def get_components(self):
-        # FIXME: Make this all component types not just Text
-        return Component.objects.filter(course=self)
-        # return Component.objects.filter(course=self)
 
     def get_absolute_url(self):
         return reverse("courses:view_course", args={self.id})
@@ -74,9 +61,6 @@ class Module(models.Model):
             self.index = Module.objects.filter(course=self.course).count()
         super(Module, self).save(*args, **kwargs)
     
-    def get_components(self):
-        return Component.objects.filter(module=self)
-    
     def add_component(self, component, index=None):
         component.module = self
         if index:
@@ -89,7 +73,7 @@ class Quiz(models.Model):
     # Optional; If a module is deleted, just set the module for this quiz to null
     module = models.OneToOneField(Module, on_delete=models.SET_NULL, null=True, blank=True)
 
-    num_questions = models.IntegerField()
+    num_questions = models.PositiveSmallIntegerField()
     passing_score = models.FloatField(validators=[MaxValueValidator(100), MinValueValidator(0)])
 
     def __str__(self):
