@@ -52,13 +52,15 @@ class QuizForm(forms.Form):
         # If I dont use [:quiz.num_questions], then everything will be fine,
         # otherwise the score is calculated randomly, even same choices are selected,
         # the result score differs
-        questions = quiz.question_set.all().order_by('?')[:quiz.num_questions]
+        questions = quiz.question_set.all().order_by('?')
         super(QuizForm, self).__init__(*args, **kwargs)
         for question in questions:
             choices = []
             for choice in Choice.objects.filter(question_id=question.id):
                 choices.append((choice.id, choice.choice_text))
             self.fields[str(question.id)] = forms.ChoiceField(label=question.question_text, required=False, choices=choices, widget=forms.RadioSelect)
+        self.fields.pop('1')
+        self.fields.pop('2')
 
 class ComponentForm(BaseForm):
     def __init__(self, *args, **kwargs):
