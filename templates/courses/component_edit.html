@@ -5,7 +5,7 @@
 {% block content %}
 
 <div class="course_component_edit">
-    <h3>{{ course.name }} > {{ component|yesno:"Edit,Create" }} Component</h3>
+    <h3>{{ course.name }} > {% if module %} {{ module.title }} > {% endif %} {{ component|yesno:"Edit,Create" }} Component</h3>
 
     {% if form.non_field_errors %}
     <div class="alert alert-danger" role="alert">
@@ -33,7 +33,7 @@
             </div>
         {% endfor %}
         <input class="btn btn-success" type="submit" value="Submit">
-        <a class="btn btn-danger" href="{% url 'courses:all_components' course_id=course.id %}">Cancel</a>
+        <a class="btn btn-danger" href="{{cancel_url}}">Cancel</a>
     </form>
     
 </div>

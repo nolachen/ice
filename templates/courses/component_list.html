@@ -2,20 +2,76 @@
 
 {% block content %}
 
-<div class="card bg-light mb-3">
-		<div id="components">
-		<h3 class="card-header">Module Components</h3>
-			{% for component in components %}
-				<div class="card-body" id="{{ component.id }}">
-					<a id="{{ component.id }}">{{ component.title }}</a>
-					{% with child_component=component.get_child_component %}
-					<p>
-						{{ child_component.get_html_representation }}
-					</p>
-					{% endwith %}
-				</div>
-			{% endfor %}
-		</div>
+<div>
+  <h3><a href="{% url 'courses:view_course' course_id=course.id %}">{{ course.name }}</a> > {{ module.title }} > Components</h3>
+
+  {% if is_instructor %}
+  <!-- ADD COMPONENT DROPDOWN MENU -->
+  <div class="dropdown">
+      <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown">Add components</button>
+      <div class="dropdown-menu">
+          <button class="dropdown-item" type="button" data-toggle="modal" data-target="#addComponentsModal">Existing</button>
+          <div class="dropdown-divider"></div>
+          <h6 class="dropdown-header">New</h6>
+          <a class="dropdown-item" href="{% url 'courses:new_component' course_id=course.id module_id=module.id type='text' %}">
+              Text
+          </a>
+          <a class="dropdown-item" href="{% url 'courses:new_component' course_id=course.id module_id=module.id type='image' %}">
+              Image
+          </a>
+      </div>
+  </div>
+  
+  <!-- MODAL -->
+  <div class="modal fade" id="addComponentsModal">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Add existing components</h5>
+          <button type="button" class="close" data-dismiss="modal">
+            <span>&times;</span>
+          </button>
+        </div>
+
+        {% if add_components_form.fields.components.queryset.count %}
+        <form action="{{ request.get_full_path }}" method="post">
+          {% csrf_token %}
+          <div class="modal-body">
+              {{ add_components_form.as_p }}
+          </div>
+
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            <input type="submit" value="Add" class="btn btn-primary">
+          </div>
+
+        </form>
+        {% else %}
+        <div class="modal-body">There are no existing components to add.</div>
+        {% endif %}
+      </div>
+    </div>
+
+  </div>
+  {% endif %}
+
+
+  <div id="components">
+    {% for component in components %}
+      {% with child_component=component.get_child_component %}
+      <div id="{{ component.id }}" class="my-2 card">
+        <div class="card-body">
+          <h6 class="card-title">{{ component.title }}</h6>
+          {{ child_component.get_html_representation }}
+        </div>
+      </div>
+      {% endwith %}
+    {% endfor %}
+  </div>
+      
+  {% if is_learner %}
+  <p><a href="{% url 'courses:take_quiz' course_id=course_id module_id=module.id quiz_id=quiz.id %}">Quiz</a></p>
+  {% endif %}
 
 </div>
 

@@ -11,6 +11,10 @@ class Learner(models.Model):
         on_delete=models.CASCADE
     )
     staff_id = models.CharField(max_length=8, validators=[MinLengthValidator(8)], unique=True)
+    cecu_awarded = models.PositiveSmallIntegerField()
+
+    def award_cecu_credit(self, cecu_value):
+        self.cecu_awarded += cecu_value
 
 class Instructor(models.Model):
     instructor = models.OneToOneField(
@@ -29,7 +33,7 @@ class Course(models.Model):
     name = models.CharField(max_length=200)
     instructor = models.ForeignKey(Instructor, on_delete=models.CASCADE)
     #instructor_name = models.TextField(default='')
-    cecu_value = models.IntegerField()
+    cecu_value = models.PositiveSmallIntegerField()
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
     description = models.TextField(default='')
     deployed = models.BooleanField(default=False)
@@ -66,12 +70,18 @@ class Module(models.Model):
     
     def save(self, *args, **kwargs):
         if not self.index:
-            # Default the index to the last one in the sequence
-            self.index = self.course.modules.count()
+            # Default the index to the last one in the course
+            self.index = Module.objects.filter(course=self.course).count()
         super(Module, self).save(*args, **kwargs)
     
     def getComponents(self):
         return Component.objects.filter(module=self)
+    
+    def add_component(self, component, index=None):
+        component.module = self
+        if index:
+            component.index = index
+        component.save()
 
 class Quiz(models.Model):
     title = models.CharField(max_length=200)
@@ -116,6 +126,7 @@ class QuizResult(models.Model):
     passed = models.BooleanField(default=False)
     timestamp = models.DateTimeField(auto_now_add=True)
 
+    @staticmethod
     def new_record(quiz_id, learner, result, passed):
         new_result = QuizResult(quiz_id=quiz_id, learner=learner, result=result, passed=passed)
         new_result.save()
@@ -130,7 +141,7 @@ class Component(models.Model):
     date_of_last_update = models.DateField(auto_now=True)
 
     # Order within the module
-    index = models.IntegerField()
+    index = models.IntegerField(null=True, blank=True)
 
     TEXT = 'TX'
     IMAGE = 'IM'
@@ -148,9 +159,13 @@ class Component(models.Model):
         return self.title
 
     def save(self, *args, **kwargs):
-        if not self.index:
+        # Only set an index if the component belongs to a module
+        if self.index is None and self.module:
             # Default the index to the last one in the sequence
-            self.index = self.course.components.count()
+            self.index = Component.objects.filter(module=self.module).count()
+        # If we remove a component from its module, reset the index
+        if self.index is not None and not self.module:
+            self.index = None
         super(Component, self).save(*args, **kwargs)
 
     def get_child_component(self):
@@ -169,14 +184,14 @@ class TextComponent(Component):
     text_passage = models.TextField()
 
     def get_html_representation(self):
-        return format_html("<p>{}</p>", self.text_passage)
+        return format_html("<p class=\"card-text\">{}</p>", self.text_passage)
 
 class ImageComponent(Component):
     image_details = models.TextField()
     image = models.ImageField(upload_to='images/')
 
     def get_html_representation(self):
-        return format_html("<div><img src={} /><p>{}</p></div>", self.image.url, self.image_details)
+        return format_html("<div><img src={} class=\"pb-2\"/><p class=\"card-text\">{}</p></div>", self.image.url, self.image_details)
 
 class Enrollment(models.Model):
     course = models.ForeignKey(Course, on_delete=models.CASCADE)
@@ -184,6 +199,7 @@ class Enrollment(models.Model):
     completed = models.BooleanField(default=False)
     completed_date = models.DateField(null=True, blank=True)
 
+    @staticmethod
     def enroll(learner, course):
         new_enrollment = Enrollment(learner=learner, course=course)
         new_enrollment.save()

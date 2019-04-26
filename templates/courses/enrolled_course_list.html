@@ -7,25 +7,23 @@
 <h3>My Enrolled Courses</h3>
 <hr>
 <div class="enrolled-courses-container">
-      <div class="completed-courses-card card bg-light">
+    <div class="completed-courses-card card bg-light">
         <h4 class="card-header">Completed</h4>
         {% if completed_enrollments %}
-        <div class="card-body">
-            {% for enrollment in completed_enrollments %}
-                <div class="enrolled-course-completed">
-                  <a class="btn btn-info mb-2" href="{% url 'courses:view_course' course_id=enrollment.course.id %}">{{ enrollment.course.name }}</a>
-                  <p>Completed Date: {{ enrollment.completed_date }}</p>
+              <div class="card-body">
+                {% for enrollment, cecu in completed_enrollments %}
+                  <p><a class="btn btn-info" href="{% url 'courses:view_course' course_id=enrollment.course.id %}">{{ enrollment.course.name }}</a></p>
+                  <p>Date of Completetion: {{ enrollment.completed_date }}</p>
+                  <p>CECU Value: {{ enrollment.course.cecu_value }}</p>
+                  <p>Cumulative CECU Value: {{ cecu }}</p>
                   <hr>
-                <br>
-                </div>
-            {% endfor %}
-        </div>
+                {% endfor %}
+              </div>
       </div>
       {% else %}
-      <div class="card-body">
-        <p>No completed courses available</p>
-      </div>
-      </div>
+        <div class="card-body">
+          <p>No completed courses available</p>
+        </div>
       {% endif %}
 
       {% if not_completed_course %}
@@ -43,7 +41,7 @@
         </div>
       </div>
       {% else %}
-      <p>No in-progress course available</p>
+      <p>No in-progress courses</p>
       {% endif %}
     </div>
   </div>

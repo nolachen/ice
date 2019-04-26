@@ -64,20 +64,21 @@ class QuizForm(forms.Form):
 class ComponentForm(BaseForm):
     def __init__(self, *args, **kwargs):
         course_id = kwargs.pop('course_id')
+        module_id = kwargs.pop('module_id')
         if not course_id:
             raise RuntimeError('Need course_id for ComponentForm')
         super(ComponentForm, self).__init__(*args, **kwargs)        
-    
-        self.fields['module'].queryset = Module.objects.filter(course=course_id)
+        if module_id:
+            del self.fields['module']
+        else:
+            self.fields['module'].queryset = Module.objects.filter(course=course_id)
+            self.fields['module'].help_text = 'Optional'
 
 
     class Meta:
         model = Component
-        fields = ('module', 'title', 'index')
-        help_texts = {
-            'module': 'Optional'
-        }
-
+        fields = ('module', 'title')
+        
 class ImageUploadForm(ComponentForm):
     def __init__(self, *args, **kwargs):
         super(ImageUploadForm, self).__init__(*args, **kwargs)
@@ -105,3 +106,15 @@ class SelectCategoryForm(forms.Form):
         for category in categories:
             choices.append((category.id, category.name))
         self.fields['category'] = forms.ChoiceField(choices=choices)
+
+class AddExistingComponentsForm(forms.Form):
+    def __init__(self, *args, **kwargs):
+        course_id = kwargs.pop('course_id')
+        if not course_id:
+            raise RuntimeError('Need course_id for ComponentForm')
+        super(AddExistingComponentsForm, self).__init__(*args, **kwargs)        
+
+        self.fields['components'] = forms.ModelMultipleChoiceField(
+            widget=forms.CheckboxSelectMultiple,
+            queryset=Component.objects.filter(course=course_id, module__isnull=True)
+        )

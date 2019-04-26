@@ -3,8 +3,10 @@ from django.http import HttpRequest, HttpResponseRedirect, HttpResponse, Http404
 from django.template import loader
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.urls import reverse
+from django.template.loader import render_to_string
+from django.core.mail import EmailMessage
 
-from courses.forms import CourseForm, ModuleForm, QuizForm, ImageUploadForm, TextComponentForm, SelectCategoryForm
+from courses.forms import CourseForm, ModuleForm, QuizForm, ImageUploadForm, TextComponentForm, SelectCategoryForm, AddExistingComponentsForm
 from courses.models import *
 
 import logging
@@ -80,15 +82,27 @@ def enroll_course(request, course_id):
 
 def load_components(request, course_id, module_id):  
     module = Module.objects.get(id=module_id)
+    course = get_object_or_404(Course, id=course_id)
     components = module.getComponents().order_by("index")
     quiz = Quiz.objects.get(module_id=module_id)
-    return render(request, 'courses/component_list.html', {
+
+    if request.POST and is_instructor(request.user):
+        form = AddExistingComponentsForm(request.POST, course_id=course_id)
+        if form.is_valid():
+            for component in form.cleaned_data['components']:
+                module.add_component(component)
+
+    add_components_form = AddExistingComponentsForm(course_id=course_id)
+    context = {
         'is_learner': is_learner(request.user),
+        'is_instructor': is_instructor(request.user),
         'components': components,
-        'course_id': course_id,
+        'course': course,
         'module': module,
         'quiz': quiz,
-    })
+        'add_components_form': add_components_form
+    }
+    return render(request, 'courses/component_list.html', context)
 
 """
 View for all of the components in a course
@@ -117,9 +131,10 @@ def edit_component(request, course_id, component_id):
         })
 
 @user_passes_test(is_instructor)
-def new_component(request, course_id, type=None, component_id=None):
+def new_component(request, course_id, module_id=None, type=None, component_id=None):
     type_to_component_type = { 'image': Component.IMAGE, 'text': Component.TEXT }
     course = Course.objects.get(id=course_id)
+    module = Module.objects.get(id=module_id) if module_id else None
 
     # You can only access this page if you own the course
     if request.user != course.instructor.instructor:
@@ -128,16 +143,21 @@ def new_component(request, course_id, type=None, component_id=None):
     if component_id:
         component = Component.objects.get(id=component_id).get_child_component()
         component_type = component.component_type
-        print("type", component_type)
     else:
         component = None
         component_type = type_to_component_type[type]
 
+    component_url = (
+        reverse("courses:load_components", kwargs={'course_id': course_id, 'module_id': module_id })
+        if module_id
+        else reverse("courses:all_components", kwargs={'course_id': course_id})
+    ) 
+
     if request.method == 'POST':
         if component_type == Component.IMAGE:
-            form = ImageUploadForm(request.POST, request.FILES, course_id=course_id, instance=component)
+            form = ImageUploadForm(request.POST, request.FILES, course_id=course_id, module_id=module_id, instance=component)
         elif component_type == Component.TEXT:
-            form = TextComponentForm(request.POST, course_id=course_id, instance=component)
+            form = TextComponentForm(request.POST, course_id=course_id, module_id=module_id, instance=component)
         else:
             raise Http404
 
@@ -146,35 +166,30 @@ def new_component(request, course_id, type=None, component_id=None):
             new_component.course = course
             new_component.component_type = component_type
             new_component.save()
-            component_url = reverse("courses:all_components", kwargs={'course_id': course_id})
+
+            if module:
+                module.add_component(new_component)
+            
             return HttpResponseRedirect(component_url)
-        else:
-            print(form.errors)
-            print(form.non_field_errors)
-            # Re-render the form, so the errors will show
-            return render(request, 'courses/component_edit.html', { 
-                'form': form,
-                'course': course,
-            }) 
 
     else:
         if component_type == Component.IMAGE:
-            form = ImageUploadForm(instance=component, course_id=course_id)
-            template = 'courses/component_edit.html'
+            form = ImageUploadForm(instance=component, course_id=course_id, module_id=module_id)
         elif component_type == Component.TEXT:
-            form = TextComponentForm(instance=component, course_id=course_id)
-            template = 'courses/component_edit.html'
+            form = TextComponentForm(instance=component, course_id=course_id, module_id=module_id)
         else:
             raise Http404
 
-        context = {
-            'form': form,
-            'course': course,
-        }
-        if component:
-            context['component'] = component
-        
-        return render(request, template, context) 
+    context = {
+        'form': form,
+        'course': course,
+        'module': module,
+        'cancel_url': component_url
+    }
+    if component:
+        context['component'] = component
+    
+    return render(request, 'courses/component_edit.html', context) 
 
 """
 Responsible for adding new courses
@@ -239,6 +254,10 @@ def view_enrolled_course(request):
     learner = Learner.objects.get(learner=request.user)
     not_completed_course = []
     completed_enrollments = Enrollment.objects.filter(learner=learner, completed=True)
+    cumulative_cecu = [0]
+    for enrollment in completed_enrollments:
+        cumulative_cecu.append(enrollment.course.cecu_value + cumulative_cecu[-1])
+    completed_enrollments = zip(completed_enrollments, cumulative_cecu[1:])
     not_completed_enrollments = Enrollment.objects.filter(learner=learner, completed=False)
     for enrollment in not_completed_enrollments:
         not_completed_course.append(Course.objects.get(enrollment=enrollment))
@@ -249,9 +268,9 @@ def view_enrolled_course(request):
 
 @user_passes_test(is_instructor)
 def edit_module(request, course_id, module_id=None):
-    # TODO: Restrict this to only instructors who own the course the module belongs to
-
-    course = Course.objects.get(id=course_id)
+    course = get_object_or_404(Course, id=course_id)
+    if module_id:
+        module = get_object_or_404(Module, id=module_id)
 
     # You can only access this page if you own the course
     if request.user != course.instructor.instructor:
@@ -267,13 +286,13 @@ def edit_module(request, course_id, module_id=None):
             form.save()
             url = reverse("courses:module_list", kwargs={'course_id': course_id})
             return HttpResponseRedirect(url)
-        else:
-            raise Http404
 
     # if module_id:
     #     module = Module.objects.get(id=module_id)
 
-    form = ModuleForm(course_id=course_id)
+    # GET method
+    else:
+        form = ModuleForm(course_id=course_id)
 
     return render(request, 'courses/module_edit.html', {
         'course': course,
@@ -312,6 +331,18 @@ def take_quiz(request, course_id, module_id, quiz_id):
                     enrollment.completed = True
                     enrollment.completed_date = date.today()
                     enrollment.save()
+
+                    learner.award_cecu_credit(course.cecu_value)
+                    mail_subject = 'You are awarded with ' + str(course.cecu_value) + ' credits!'
+                    message = render_to_string('courses/award_cecu_value_email.html', {
+                        'user': request.user,
+                        'course': course,
+                    })
+                    to_email = request.user.email
+                    email = EmailMessage(
+                                mail_subject, message, to=[to_email]
+                    )
+                    email.send()
             else:
                 passed = False
             

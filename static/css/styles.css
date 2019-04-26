@@ -1,6 +1,6 @@
 /* Homepage */
 .page {
-    display: flex;
+    /* display: flex; */
 }
 
 .sidenav {
@@ -29,6 +29,7 @@
     flex-direction: column;
     padding: 50px 100px;
     width: auto;
+    margin: 0 auto;
 }
 
 .available-courses-container {
