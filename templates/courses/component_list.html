@@ -77,4 +77,8 @@
 
 </div>
 
+{% if is_learner %}
+	<p><a class="btn btn-primary" href="{% url 'courses:take_quiz' course_id=course_id module_id=module.id quiz_id=quiz.id %}">Take Quiz</a></p>
+{% endif %}
+
 {% endblock %}

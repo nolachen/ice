@@ -1,46 +1,51 @@
 <!-- templates/home.html-->
 {% extends 'base.html' %}
 {% load user_filters %}
+{% load crispy_forms_tags %}
 
 {% block title %}Home{% endblock %}
 
 {% block content %}
 {% if user.is_authenticated %}
+<div>
   <h1 class="display-4">Hi {{ user.username }}!</h1>
-  <br>
   {% if user|is_learner %}
   <h4>
-    <a href="{% url 'courses:view_enrolled_course'%}">Enrolled Courses</a>
+    <a class="btn btn-info" href="{% url 'courses:view_enrolled_course'%}">My Enrolled Courses</a>
   </h4>
   {% endif %}
-  <h4>Available Courses</h4>
-    <form action="" method="POST">
-        {% csrf_token %}
-        {{ form }}
-        <input type="submit" value="Submit">
-    </form>
-    <div class="course-grid">
-      {% for course in courses %}
-        {% if user|is_instructor or course.deployed %}
-        <div class="card" style="width: 18rem;">
-          <div class="card-body">
-            <h5 class="card-title">{{ course.name }}</h5>
-            <h6 class="card-subtitle mb-2 text-muted">{{ course.category }}</h6>
-            <p class="card-text">{{ course.description }}</p>
-            <a class="btn btn-secondary w-100" href="{% url 'courses:view_course' course.id %}" class="card-link">View Details</a>
-          </div>
+  </div>
+      <div>
+        <hr>
+        <div class="available-courses-container">
+          <h4>Available Courses</h4>
+          <form action="" method="POST">
+              {% csrf_token %}
+              {{ form }}
+              <button type="submit" class="btn btn-light mb-3">Filter</button>
+          </form>
         </div>
-        {% endif %}
-      {% endfor %}
+        <div class="course-grid">
+        {% for course in courses %}
+          <div class="card bg-light mb-3" style="width: 18rem;">
+            <div class="card-body">
+              <h5 class="card-title">{{ course.name }}</h5>
+              <h6 class="card-subtitle mb-2 text-muted">{{ course.category }}</h6>
+              <p class="card-text">{{ course.description }}</p>
+              <a class="btn btn-secondary w-100" href="{% url 'courses:view_course' course.id %}" class="card-link">View Details</a>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
     </div>
 {% else %}
-<div id="container">
-<div id="home_form">
+<div class="container">
+<div class="home_form">
   <h2 class="alt-text">Welcome to ICE Portal</h2>
-  <hr class="divider">
-  <div id="login_form">
-  <a id="login_button" href="{% url 'login' %}">Login</a>
-  <a id="signup_button" href="{% url 'signup' %}">Signup</a>
+  <hr>
+  <div class="login_form">
+  <a class="btn btn-primary" href="{% url 'login' %}">Login</a>
+  <a class="btn btn-primary" href="{% url 'signup' %}">Signup</a>
     </div>
 </div>
 </div>
