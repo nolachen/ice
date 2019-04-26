@@ -102,7 +102,7 @@ class Answer(models.Model):
     correct_answer = models.ForeignKey(Choice, on_delete=models.CASCADE, default=0)
 
 class QuizResult(models.Model):
-    quiz = models.ForeignKey(Module, on_delete=models.CASCADE)
+    quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE)
     learner = models.ForeignKey(Learner, on_delete=models.CASCADE)
     # Result will be stored in the form of over a hundred
     # For example, if a learner score 4 out of 5 questions, the result stored will be 80.0
