@@ -21,6 +21,7 @@
     </form>
     <div class="course-grid">
       {% for course in courses %}
+        {% if user|is_instructor or course.deployed %}
         <div class="card" style="width: 18rem;">
           <div class="card-body">
             <h5 class="card-title">{{ course.name }}</h5>
@@ -29,6 +30,7 @@
             <a class="btn btn-secondary w-100" href="{% url 'courses:view_course' course.id %}" class="card-link">View Details</a>
           </div>
         </div>
+        {% endif %}
       {% endfor %}
     </div>
 {% else %}

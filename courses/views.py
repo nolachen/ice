@@ -1,27 +1,22 @@
-from django.shortcuts import render, get_object_or_404
-from django.http import HttpRequest, HttpResponseRedirect, HttpResponse, Http404
+from django.shortcuts import render, get_object_or_404, redirect
+from django.http import HttpRequest, HttpResponseRedirect, HttpResponse, Http404, JsonResponse
 from django.template import loader
-from django.contrib.auth.decorators import login_required, user_passes_test
-from django.urls import reverse
+from django.urls import reverse, reverse_lazy
 from django.template.loader import render_to_string
 from django.core.mail import EmailMessage
 
-from courses.forms import CourseForm, ModuleForm, QuizForm, ImageUploadForm, TextComponentForm, SelectCategoryForm, AddExistingComponentsForm
-from courses.models import *
-
-import logging
-logger = logging.getLogger(__name__)
-
-from django.template import loader
-from django.shortcuts import redirect
-from django.contrib.auth.models import User
 from django.contrib.auth import logout, authenticate, login
+from django.contrib.auth.models import User
 from django.contrib.auth.forms import AuthenticationForm
+from django.contrib.auth.decorators import login_required, user_passes_test
 
-from django.urls import reverse_lazy
+from courses.forms import CourseForm, ModuleForm, QuizForm, ImageUploadForm, TextComponentForm, SelectCategoryForm, AddExistingComponentsForm
+from courses.models import Instructor, Learner, Course, Module, Quiz, Answer, QuizResult, Component, Enrollment
 
 from datetime import date
 
+import logging, json
+logger = logging.getLogger(__name__)
 
 # USER IDENTITY HELPERS
 def is_instructor(user):
@@ -82,8 +77,8 @@ def enroll_course(request, course_id):
 
 def load_components(request, course_id, module_id):  
     module = Module.objects.get(id=module_id)
+    components = Component.objects.filter(module_id=module_id).order_by("index")
     course = get_object_or_404(Course, id=course_id)
-    components = module.getComponents().order_by("index")
     quiz = Quiz.objects.get(module_id=module_id)
 
     if request.POST and is_instructor(request.user):
@@ -110,7 +105,7 @@ View for all of the components in a course
 @user_passes_test(is_instructor)
 def all_components(request, course_id):
     course = Course.objects.get(id=course_id)
-    components = course.get_components()
+    components = Component.objects.filter(course_id=course_id)
     return render(request, 'courses/components.html', {
         'components': components,
         'course': course
@@ -213,6 +208,14 @@ def add_course(request):
         'form': form,
     })
 
+@user_passes_test(is_instructor)
+def deploy_course(request, course_id):
+    course = Course.objects.get(id=course_id)
+    course.deployed = True
+    course.save()
+    print(course_id)
+    return redirect('courses:view_course', course_id)
+
 def home(request):
     if request.POST:
         form = SelectCategoryForm(request.POST)
@@ -265,6 +268,78 @@ def view_enrolled_course(request):
         'completed_enrollments': completed_enrollments,
         'not_completed_course': not_completed_course,
     })
+
+@user_passes_test(is_instructor)
+def reorder_module(request, course_id):
+    course = Course.objects.get(id=course_id)
+    modules = course.modules.order_by('index').all()
+
+    if request.user != course.instructor.instructor:
+        raise Http404
+
+    return render(request, 'courses/module_reorder.html', {
+        'course': course,
+        'modules': modules,
+    })
+
+@user_passes_test(is_instructor)
+def reorder_module_save(request, course_id):
+    course = Course.objects.get(id=course_id)
+
+    if request.user != course.instructor.instructor:
+        raise Http404
+    
+    if request.method == "POST" and request.is_ajax():
+        new_module_order = request.POST.get('new_module_order')
+        new_module_order_list = json.loads(new_module_order)
+        new_module_order_list = list(map(int, new_module_order_list))
+        # start from 1 because django cannot store 0
+        counter = 1
+        for item_id in new_module_order_list:
+            module = Module.objects.get(id=item_id)
+            module.index = counter
+            module.save()
+            counter += 1
+        return JsonResponse(new_module_order, safe=False)
+
+    return redirect('courses:view_course', course_id)
+
+@user_passes_test(is_instructor)
+def reorder_component(request, course_id, module_id):
+    course = Course.objects.get(id=course_id)
+    module = Module.objects.get(id=module_id)
+    components = Component.objects.filter(module_id=module_id)
+
+    if request.user != course.instructor.instructor:
+        raise Http404
+
+    return render(request, 'courses/component_reorder.html', {
+        'course': course,
+        'module': module,
+        'components': components,
+    })
+
+@user_passes_test(is_instructor)
+def reorder_component_save(request, course_id, module_id):
+    course = Course.objects.get(id=course_id)
+
+    if request.user != course.instructor.instructor:
+        raise Http404
+    
+    if request.method == "POST" and request.is_ajax():
+        new_comp_order = request.POST.get('new_comp_order')
+        new_comp_order_list = json.loads(new_comp_order)
+        new_comp_order_list = list(map(int, new_comp_order_list))
+        # start from 1 because django cannot store 0
+        counter = 1
+        for item_id in new_comp_order_list:
+            component = Component.objects.get(id=item_id)
+            component.index = counter
+            component.save()
+            counter += 1
+        return JsonResponse(new_comp_order, safe=False)
+
+    return redirect('courses:view_course', course_id)
 
 @user_passes_test(is_instructor)
 def edit_module(request, course_id, module_id=None):
