@@ -418,7 +418,7 @@ def take_quiz(request, course_id, module_id, quiz_id):
                 if ( int(form.cleaned_data[str(question.id)]) == (Answer.objects.get(question_id=question.id).correct_answer_id)):
                     num_of_correct += 1
             
-            if (num_of_correct >= quiz.passing_score * (quiz.num_questions - 2) / 100):
+            if (num_of_correct >= quiz.passing_score * quiz.num_questions / 100):
                 is_passed = True
                 # Check if the module is the last module
                 module = Module.objects.get(id=module_id)
@@ -443,7 +443,7 @@ def take_quiz(request, course_id, module_id, quiz_id):
             else:
                 is_passed = False
             
-            QuizResult.new_record(quiz.id, learner, num_of_correct / (quiz.num_questions - 2) * 100, is_passed)
+            QuizResult.new_record(quiz.id, learner, num_of_correct / quiz.num_questions * 100, is_passed)
         else:
             raise Http404
 
@@ -451,8 +451,8 @@ def take_quiz(request, course_id, module_id, quiz_id):
             "course_id": quiz.course_id,
             "quiz": quiz,
             "is_passed": is_passed,
-            "score": num_of_correct / (quiz.num_questions - 2) * 100,
-            "passing_score": quiz.passing_score * (quiz.num_questions - 2),
+            "score": num_of_correct / quiz.num_questions * 100,
+            "passing_score": quiz.passing_score * quiz.num_questions,
         })
     else:
         form = QuizForm(quiz_id)

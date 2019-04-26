@@ -59,8 +59,9 @@ class QuizForm(forms.Form):
             for choice in Choice.objects.filter(question_id=question.id):
                 choices.append((choice.id, choice.choice_text))
             self.fields[str(question.id)] = forms.ChoiceField(label=question.question_text, required=False, choices=choices, widget=forms.RadioSelect)
-        self.fields.pop('1')
-        self.fields.pop('2')
+        print (questions.count())
+        for i in range(questions.count() - quiz.num_questions):
+            self.fields.pop(str(i + 1))
 
 class ComponentForm(BaseForm):
     def __init__(self, *args, **kwargs):
