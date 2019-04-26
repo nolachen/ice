@@ -110,6 +110,8 @@ class SelectCategoryForm(forms.Form):
 class AddExistingComponentsForm(forms.Form):
     def __init__(self, *args, **kwargs):
         course_id = kwargs.pop('course_id')
+        module_id = kwargs.pop('module_id')
+        
         if not course_id:
             raise RuntimeError('Need course_id for ComponentForm')
         super(AddExistingComponentsForm, self).__init__(*args, **kwargs)        
@@ -118,6 +120,6 @@ class AddExistingComponentsForm(forms.Form):
             widget=forms.CheckboxSelectMultiple,
             queryset=Component.objects.filter(course=course_id, module__isnull=True)
         )
-        # module_id = kwargs.pop('module_id')
-        # max = Course.objects.filter(module_id=module_id).count()
-        self.fields['index to insert'] = forms.IntegerField(min_value=0, widget=forms.NumberInput())
+
+        max = Component.objects.filter(module_id=module_id).count()
+        self.fields['index to insert'] = forms.IntegerField(min_value=1, max_value=max, widget=forms.NumberInput())
