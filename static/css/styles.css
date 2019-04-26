@@ -132,6 +132,24 @@
 
 
 /* Modules */
+#sortable {
+    margin: 1px;
+    border: 1px solid #EEE;
+    padding: 2px;
+    list-style: none;
+    width: 210px;
+    background: #FFF;
+  }
+  
+#sortable li {
+    padding: 3px;
+    padding-left: 5px;
+    margin: 2px;
+    width: 200px;
+    border-radius: 4px;
+    color: #FFF;
+    background: gray;
+}
 
 /* Quiz */
 

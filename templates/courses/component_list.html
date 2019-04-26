@@ -5,7 +5,9 @@
 <div>
   <h3><a href="{% url 'courses:view_course' course_id=course.id %}">{{ course.name }}</a> > {{ module.title }} > Components</h3>
 
-  {% if is_instructor %}
+  {% if is_instructor and course.deployed %}
+  <p>This course is deployed, you are not allowed to add components.</p>
+  {% else %}
   <!-- ADD COMPONENT DROPDOWN MENU -->
   <div class="dropdown">
       <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown">Add components</button>
@@ -20,7 +22,7 @@
               Image
           </a>
       </div>
-  </div>
+  </div>  
   
   <!-- MODAL -->
   <div class="modal fade" id="addComponentsModal">

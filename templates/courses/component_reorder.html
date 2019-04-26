@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="course_component_reorder">
+	<h3><a href="{% url 'courses:view_course' course_id=course.id %}">{{ course.name }}</a> > Reorder Components</h3>
+	<script>
+			$(function() {
+			$("#save").button().click(function(e) {
+				var arrayOrder = $("#sortable").sortable("toArray")[0];
+				var new_comp_list = []
+				$.each(arrayOrder.children, function() {
+					new_comp_list.push(this.id);
+				});
+				$.ajax({
+					type: "POST",
+					url: "reorder_component_save",
+					dataType: "json",
+					data: {
+						csrfmiddlewaretoken: '{{ csrf_token }}',
+						new_comp_order: JSON.stringify(new_comp_list),
+					}
+				}).fail(function(XMLHttpRequest, textStatus, errorThrown){
+							console.log('ERROR: ' + errorThrown)
+				}).done(function(data){
+							alert('The new order is saved!');
+					window.location.href = "{% url 'courses:view_course' course_id=course.id %}";
+				})
+			});
+			$("#sortable").sortable();
+		});
+	</script>
+
+	<div>
+		<ul id="sortable">
+			{% for component in components %}
+				<li id="{{ component.id }}">{{ component.title }}</li>
+			{% endfor %}
+			</ul>
+		</br>
+			<a id="save" href="#">Save Changes</a>
+	</div>
+</div>
+
+{% endblock %}
