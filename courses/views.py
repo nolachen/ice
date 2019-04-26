@@ -7,7 +7,7 @@ from django.template.loader import render_to_string
 from django.core.mail import EmailMessage
 
 from courses.forms import CourseForm, ModuleForm, QuizForm, ImageUploadForm, TextComponentForm, SelectCategoryForm, AddExistingComponentsForm
-from courses.models import *
+from courses.models import Instructor, Learner, Course, Module, Quiz, Answer, QuizResult, Component, Enrollment
 
 import logging, json
 logger = logging.getLogger(__name__)
