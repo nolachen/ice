@@ -67,6 +67,10 @@ class Module(models.Model):
             component.index = index
         component.save()
 
+    def add_quiz(self, quiz):
+        quiz.module = self
+        quiz.save()
+
 class Quiz(models.Model):
     title = models.CharField(max_length=200)
     course = models.ForeignKey(Course, related_name="quizzes", on_delete=models.CASCADE)

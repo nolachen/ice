@@ -42,7 +42,7 @@ class ModuleForm(forms.ModelForm):
         #     queryset=course.imagecomponents.filter(module__isnull=True)
         # )
         self.fields['quiz'] = forms.ModelChoiceField(
-            required=False,
+            required=True,
             queryset=course.quizzes.filter(module__isnull=True)
         )
 
@@ -78,7 +78,7 @@ class ComponentForm(BaseForm):
     class Meta:
         model = Component
         fields = ('module', 'title')
-        
+
 class ImageUploadForm(ComponentForm):
     def __init__(self, *args, **kwargs):
         super(ImageUploadForm, self).__init__(*args, **kwargs)
