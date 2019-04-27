@@ -86,11 +86,11 @@ def load_components(request, course_id, module_id):
     if request.POST and is_instructor(request.user):
         form = AddExistingComponentsForm(request.POST, course_id=course_id, module_id=module_id)
         if form.is_valid():
-            counter = form.cleaned_data['index to insert']
+            counter = form.cleaned_data['index']
             orginal_component = components
             num_new_components = form.cleaned_data['components'].count()
             for component in orginal_component:
-                if component.index >= form.cleaned_data['index to insert']:
+                if component.index >= form.cleaned_data['index']:
                     component.index += num_new_components
                     component.save()
             for component in form.cleaned_data['components']:
@@ -98,6 +98,8 @@ def load_components(request, course_id, module_id):
                 component.index = counter
                 counter += 1
                 component.save()
+            url = reverse("courses:load_components", kwargs={'course_id': course_id, 'module_id': module_id })
+            return HttpResponseRedirect(url)
             
     add_components_form = AddExistingComponentsForm(course_id=course_id, module_id=module_id)
     context = {
@@ -111,9 +113,6 @@ def load_components(request, course_id, module_id):
     }
     return render(request, 'courses/component_list.html', context)
 
-"""
-View for all of the components in a course
-"""
 @user_passes_test(is_instructor)
 def all_components(request, course_id):
     course = Course.objects.get(id=course_id)
@@ -155,7 +154,7 @@ def new_component(request, course_id, module_id=None, type=None, component_id=No
         component_type = type_to_component_type[type]
 
     component_url = (
-        reverse("courses:load_components", kwargs={'course_id': course_id, 'module_id': module_id })
+        reverse("courses:load_components", kwargs={'course_id': course_id, 'module_id': module_id})
         if module_id
         else reverse("courses:all_components", kwargs={'course_id': course_id})
     ) 
@@ -198,11 +197,6 @@ def new_component(request, course_id, module_id=None, type=None, component_id=No
     
     return render(request, 'courses/component_edit.html', context) 
 
-"""
-Responsible for adding new courses
-
-Utilized CourseForm which is in the file forms.py
-"""
 @user_passes_test(is_instructor)
 def add_course(request):
     if request.POST:
@@ -369,11 +363,21 @@ def edit_module(request, course_id, module_id=None):
     if request.method == 'POST':
         form = ModuleForm(request.POST, course_id=course_id)
         if form.is_valid():
+            modules = Module.objects.filter(course_id=course_id).order_by("index")
+            module = form.save(commit=False)
+
+            counter = form.cleaned_data['index']
+            for moduleIndex in modules:
+                if moduleIndex.index >= form.cleaned_data['index']:
+                    moduleIndex.index += 1
+                    moduleIndex.save()
+
+            module.course = course
+            module.index = counter
+
             quiz = form.cleaned_data.get('quiz')
-            new_module = form.save(commit=False)
-            new_module.course = course
-            new_module.save()
-            new_module.add_quiz(quiz)
+            module.save()
+            module.add_quiz(quiz)
             url = reverse("courses:module_list", kwargs={'course_id': course_id})
             return HttpResponseRedirect(url)
 
@@ -471,41 +475,43 @@ def take_quiz(request, course_id, module_id, quiz_id):
         "form": form,
     })
 
-# def view_component(request, course_id):
-#     course = Course.objects.get(id=course_id)
-#     template = 'courses/component_details.html'
+"""
+def view_component(request, course_id):
+    course = Course.objects.get(id=course_id)
+    template = 'courses/component_details.html'
 
-#     return render(request, template, {
-#         'course': course
-#     })
+    return render(request, template, {
+        'course': course
+    })
 
-# @user_passes_test(is_instructor)
-# def upload_image(request, course_id):
-#     course = Course.objects.get(id=course_id)
+@user_passes_test(is_instructor)
+def upload_image(request, course_id):
+    course = Course.objects.get(id=course_id)
 
-#     if request.method == 'POST':
-#         form = ImageUploadForm(request.POST, request.FILES, course_id=course_id)
-#         if form.is_valid():
-#             form = form.save(commit=False)
-#             form.course = course
-#             form.save()
-#             return render(request, 'courses/component_details.html', {
-#                 'course_id': course_id,
-#                 'course': course,
-#                 'form': form,
-#             })
-#         else:
-#             raise Http404
+    if request.method == 'POST':
+        form = ImageUploadForm(request.POST, request.FILES, course_id=course_id)
+        if form.is_valid():
+            form = form.save(commit=False)
+            form.course = course
+            form.save()
+            return render(request, 'courses/component_details.html', {
+                'course_id': course_id,
+                'course': course,
+                'form': form,
+            })
+        else:
+            raise Http404
 
-#         return render(request, 'courses/component_details.html', {
-#             'course_id': course_id,
-#             'course': course,
-#         })
-#     else:
-#         form = ImageUploadForm(request.POST, request.FILES, course_id=course_id)
+        return render(request, 'courses/component_details.html', {
+            'course_id': course_id,
+            'course': course,
+        })
+    else:
+        form = ImageUploadForm(request.POST, request.FILES, course_id=course_id)
     
-#     return render(request, 'courses/create_image_component.html', { 
-#         'form': form,
-#         'course_id': course_id, 
-#         'course': course,
-#     })
+    return render(request, 'courses/create_image_component.html', { 
+        'form': form,
+        'course_id': course_id, 
+        'course': course,
+    })
+"""

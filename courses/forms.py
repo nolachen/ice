@@ -13,9 +13,6 @@ class BaseForm(forms.ModelForm):
             else:     
                 field.widget.attrs['class'] = 'form-control'
 
-"""
-For adding new courses
-"""
 class CourseForm(forms.ModelForm):
     class Meta:
         model = Course
@@ -33,18 +30,22 @@ class ModuleForm(BaseForm):
 
         super(ModuleForm, self).__init__(*args, **kwargs)
         course = Course.objects.get(id=course_id)
-        # self.fields['textcomponents'] = forms.ModelMultipleChoiceField(
-        #     required=False,
-        #     queryset=course.textcomponents.filter(module__isnull=True)
-        # )
-        # self.fields['imagecomponents'] = forms.ModelMultipleChoiceField(
-        #     required=False,
-        #     queryset=course.imagecomponents.filter(module__isnull=True)
-        # )
+        """
+        self.fields['textcomponents'] = forms.ModelMultipleChoiceField(
+            required=False,
+            queryset=course.textcomponents.filter(module__isnull=True)
+        )
+        self.fields['imagecomponents'] = forms.ModelMultipleChoiceField(
+            required=False,
+            queryset=course.imagecomponents.filter(module__isnull=True)
+        )
+        """
         self.fields['quiz'] = forms.ModelChoiceField(
             required=True,
             queryset=course.quizzes.filter(module__isnull=True)
         )
+        max = Module.objects.filter(course_id=course_id).count()
+        self.fields['index'] = forms.IntegerField(min_value=0, max_value=max, widget=forms.NumberInput())
 
 class QuizForm(forms.Form):
     def __init__(self, quiz_id, *args, **kwargs):
@@ -124,4 +125,4 @@ class AddExistingComponentsForm(forms.Form):
         )
 
         max = Component.objects.filter(module_id=module_id).count()
-        self.fields['index to insert'] = forms.IntegerField(min_value=1, max_value=max, widget=forms.NumberInput())
+        self.fields['index'] = forms.IntegerField(min_value=0, max_value=max, widget=forms.NumberInput())
