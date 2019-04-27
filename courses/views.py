@@ -374,7 +374,7 @@ def edit_module(request, course_id, module_id=None):
 
             module.course = course
             module.index = counter
-
+            module.save()
             quiz = form.cleaned_data.get('quiz')
             module.save()
             module.add_quiz(quiz)
